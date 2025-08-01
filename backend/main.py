@@ -1,7 +1,7 @@
 #main.py
 from fastapi import FastAPI
 from pydantic import BaseModel
-from chatbot_faiss_utils_2 import *
+from chatbot_faiss_utils import *
 from openai import OpenAI
 import numpy as np
 from fastapi.middleware.cors import CORSMiddleware
