@@ -1,6 +1,7 @@
 fastapi
 uvicorn
 openai
-faiss-cpu
-python-dotenv
 numpy
+python-dotenv
+jinja2
+faiss-cpu
