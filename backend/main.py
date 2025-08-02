@@ -6,8 +6,15 @@ from openai import OpenAI
 import numpy as np
 from fastapi.middleware.cors import CORSMiddleware
 import os
+from fastapi import FastAPI, Request            
+from fastapi.responses import HTMLResponse     
+from fastapi.templating import Jinja2Templates 
 
 app = FastAPI()
+
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
+
+templates = Jinja2Templates(directory="app/templates")
 
 app.add_middleware(
     CORSMiddleware,
@@ -17,7 +24,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))  # 환경변수에서 읽음
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # 문서 및 인덱스 로딩
 documents = load_paragraphs("documents.txt")
@@ -78,5 +85,11 @@ async def handle_query(request: QueryRequest):
     # 5. 프론트로 응답 반환
     return {"answer": chat_response.choices[0].message.content}
 
+@app.get("/", response_class=HTMLResponse)
+async def serve_index(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
 
+@app.get("/chat", response_class=HTMLResponse)
+async def serve_chat(request: Request):
+    return templates.TemplateResponse("chat.html", {"request": request})
 
