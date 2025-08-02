@@ -33,57 +33,59 @@
     </div>
 
     <script>
-      async function sendMessage() {
-        const input = document.getElementById("questionInput");
-        const text = input.value.trim();
-        if (!text) return;
-    
-        const chatBody = document.getElementById("chatBody");
-    
-        const userBubble = document.createElement("div");
-        userBubble.className = "chat-bubble user";
-        userBubble.textContent = text;
-        chatBody.appendChild(userBubble);
-    
-        input.value = "";
-        chatBody.scrollTop = chatBody.scrollHeight;
-    
-        try {
-          // ✅ 수정된 부분
-          const res = await fetch("https://suryongbot-1.onrender.com/query", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ query: text })  // ✅ 수정된 key
-          });
-    
-          const data = await res.json();
-    
-          const botContainer = document.createElement("div");
-          botContainer.className = "bot-container";
-    
-          const suryongImg = document.createElement("img");
-          suryongImg.src = "/static/assets/suryong.png";
-          suryongImg.alt = "수룡이";
-          suryongImg.className = "suryong-profile";
-    
-          const botBubble = document.createElement("div");
-          botBubble.className = "chat-bubble bot";
-          botBubble.textContent = data.answer || "답변을 가져오는 데 문제가 생겼어요.";
-    
-          botContainer.appendChild(suryongImg);
-          botContainer.appendChild(botBubble);
-          chatBody.appendChild(botContainer);
-    
-          chatBody.scrollTop = chatBody.scrollHeight;
-        } catch (error) {
-          const errorBubble = document.createElement("div");
-          errorBubble.className = "chat-bubble bot";
-          errorBubble.textContent = "⚠️ 서버와 연결할 수 없어요.";
-          chatBody.appendChild(errorBubble);
-          chatBody.scrollTop = chatBody.scrollHeight;
-        }
-      }
-    </script>
+  async function sendMessage() {
+    const input = document.getElementById("questionInput");
+    const text = input.value.trim();
+    if (!text) return;
+
+    const chatBody = document.getElementById("chatBody");
+
+    // ① 사용자 말풍선
+    const userBubble = document.createElement("div");
+    userBubble.className = "chat-bubble user";
+    userBubble.textContent = text;
+    chatBody.appendChild(userBubble);
+    input.value = "";
+    chatBody.scrollTop = chatBody.scrollHeight;
+
+    // ② "입력중입니다..." 수룡이 말풍선
+    const botContainer = document.createElement("div");
+    botContainer.className = "bot-container";
+
+    const suryongImg = document.createElement("img");
+    suryongImg.src = "/static/assets/suryong.png";
+    suryongImg.alt = "수룡이";
+    suryongImg.className = "suryong-profile";
+
+    const botBubble = document.createElement("div");
+    botBubble.className = "chat-bubble bot";
+    botBubble.textContent = "입력중입니다..."; // 초기 로딩 메시지
+
+    botContainer.appendChild(suryongImg);
+    botContainer.appendChild(botBubble);
+    chatBody.appendChild(botContainer);
+    chatBody.scrollTop = chatBody.scrollHeight;
+
+    try {
+      const res = await fetch("/query", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: text })
+      });
+
+      const data = await res.json();
+
+      // ③ GPT 응답으로 메시지 업데이트
+      botBubble.textContent = data.answer || "답변을 가져오는 데 문제가 생겼어요.";
+      chatBody.scrollTop = chatBody.scrollHeight;
+
+    } catch (error) {
+      botBubble.textContent = "⚠️ 서버와 연결할 수 없어요.";
+      chatBody.scrollTop = chatBody.scrollHeight;
+    }
+  }
+</script>
+
     
   </body>
 </html>
