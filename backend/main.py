@@ -42,7 +42,7 @@ async def handle_query(request: QueryRequest):
     query_embedding = query_embedding / np.linalg.norm(query_embedding)
 
     # 2. FAISS로 유사 문단 검색
-    top_k = 3
+    top_k = 5
     scores, indices = index.search(np.array([query_embedding]), top_k)
     retrieved = "\n\n".join([documents[idx] for idx in indices[0]])
 
