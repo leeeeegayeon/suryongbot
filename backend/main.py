@@ -6,7 +6,6 @@ from openai import OpenAI
 import numpy as np
 from fastapi.middleware.cors import CORSMiddleware
 import os
-from flask import Flask
 
 app = FastAPI()
 
@@ -79,12 +78,4 @@ async def handle_query(request: QueryRequest):
     return {"answer": chat_response.choices[0].message.content}
 
 
-app = Flask(__name__)
-
-@app.route("/")
-def home():
-    return "Hello from 수룡이 chatbot!"
-
-if __name__ == "__main__":
-    app.run()
 
