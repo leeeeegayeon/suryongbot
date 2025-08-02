@@ -1,4 +1,7 @@
 /* 전체 배경 */
+html, body {
+  overflow-x: hidden;
+}
 body.chat-body-bg {
   margin: 0;
   padding: 0;
