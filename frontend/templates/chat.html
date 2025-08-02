@@ -49,11 +49,11 @@
         chatBody.scrollTop = chatBody.scrollHeight;
     
         try {
-          // ✅ 수정된 부분
+          //수정된 부분
           const res = await fetch("https://suryongbot-zakf.onrender.com/query", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ query: text })  // ✅ 수정된 key
+            body: JSON.stringify({ query: text })  // 수정된 key
           });
     
           const data = await res.json();
@@ -78,7 +78,7 @@
         } catch (error) {
           const errorBubble = document.createElement("div");
           errorBubble.className = "chat-bubble bot";
-          errorBubble.textContent = "⚠️ 서버와 연결할 수 없어요.";
+          errorBubble.textContent = "서버와 연결할 수 없어요.";
           chatBody.appendChild(errorBubble);
           chatBody.scrollTop = chatBody.scrollHeight;
         }
