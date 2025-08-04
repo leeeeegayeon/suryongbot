@@ -12,13 +12,11 @@
 <body>
   <header>
     <img src="/static/assets/logo.png" class="logo" />
-    <!-- 햄버거 메뉴 버튼 -->
-<div class="hamburger-menu">
-  <span></span>
-  <span></span>
-  <span></span>
-</div>
-
+    <div class="hamburger-menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
   </header>
 
   <main>
@@ -26,15 +24,32 @@
       <h1>사회를 밝히는 별,<br>미래를 이끄는 성신여대</h1>
     </div>
 
-    <a href="https://ipsi.sungshin.ac.kr/main/" target="_blank" class="go-to-btn">입학처 홈페이지 바로가기</a>
+    <a href="https://ipsi.sungshin.ac.kr/main/" target="_blank" class="go-to-btn">
+      입학처 홈페이지 바로가기
+    </a>
   </main>
 
   <a href="/chat">
     <img src="/static/assets/suryong.png" class="suryong" />
   </a>
-  
-  
+
+  <!-- 🌟 햄버거 메뉴 열릴 때 보여지는 사이드 메뉴 -->
+  <div class="side-menu" id="sideMenu">
+    <ul>
+      <li><a href="#">달력</a></li>
+      <li><a href="#">모집 요강</a></li>
+      <li><a href="#">캠퍼스 안내</a></li>
+    </ul>
+  </div>
+
+  <!-- 🌟 수룡이 말풍선 -->
+  <div class="suryong-container">
+    <div class="speech-bubble">
+      안녕하세요! 성신여대 입시 정보를 안내해드릴 수룡이에요 😊
+    </div>
+  </div>
 </body>
+
 <script>
   document.addEventListener("DOMContentLoaded", function () {
     const hamburger = document.querySelector(".hamburger-menu");
@@ -42,24 +57,10 @@
 
     hamburger.addEventListener("click", () => {
       menu.classList.toggle("open");
+      document.body.classList.toggle("side-open");
+
     });
   });
 </script>
 </html>
-
-<!-- 수룡이 말풍선 영역 -->
-<div class="suryong-container">
-  <div class="speech-bubble">
-    안녕하세요! 성신여대 입시 정보를 안내해드릴 수룡이에요 😊
-  </div>
-  
-
-<!-- 메뉴창 -->
-<div class="side-menu" id="sideMenu">
-  <ul>
-    <li><a href="#">달력</a></li>
-    <li><a href="#">모집 요강</a></li>
-    <li><a href="#">캠퍼스 안내</a></li>
-  </ul>
-</div>
 
