@@ -28,64 +28,112 @@
 
     <!-- 입력창 -->
     <div class="input-area">
-      <textarea id="questionInput" placeholder="질문을 입력해 주세요..."></textarea>
+      <textarea id="questionInput" placeholder="수룡이에게 궁금한 것을 물어봐!"></textarea>
       <button onclick="sendMessage()" class="send-btn">&#x2191;</button>
     </div>
 
+    <div class="recommend-questions" id="recommendQuestions">
+    </div>
+
     <script>
-  async function sendMessage() {
-    const input = document.getElementById("questionInput");
-    const text = input.value.trim();
-    if (!text) return;
+      async function sendMessage() {
+        const input = document.getElementById("questionInput");
+        const text = input.value.trim();
+        if (!text) return;
+    
+        const chatBody = document.getElementById("chatBody");
+    
+        // ① 사용자 말풍선
+        const userBubble = document.createElement("div");
+        userBubble.className = "chat-bubble user";
+        userBubble.textContent = text;
+        chatBody.appendChild(userBubble);
+        input.value = "";
+        chatBody.scrollTop = chatBody.scrollHeight;
+    
+        // ② "입력중입니다..." 수룡이 말풍선
+        const botContainer = document.createElement("div");
+        botContainer.className = "bot-container";
+    
+        const suryongImg = document.createElement("img");
+        suryongImg.src = "/static/assets/suryong.png";
+        suryongImg.alt = "수룡이";
+        suryongImg.className = "suryong-profile";
+    
+        const botBubble = document.createElement("div");
+        botBubble.className = "chat-bubble bot";
+        botBubble.textContent = "입력중입니다..."; // 초기 로딩 메시지
+    
+        botContainer.appendChild(suryongImg);
+        botContainer.appendChild(botBubble);
+        chatBody.appendChild(botContainer);
+        chatBody.scrollTop = chatBody.scrollHeight;
+    
+        try {
+          const res = await fetch("/query", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ query: text })
+          });
+    
+          const data = await res.json();
+    
+          // ③ GPT 응답으로 메시지 업데이트
+          botBubble.textContent = data.answer || "답변을 가져오는 데 문제가 생겼어요.";
+          chatBody.scrollTop = chatBody.scrollHeight;
+    
+        } catch (error) {
+          botBubble.textContent = "⚠️ 서버와 연결할 수 없어요.";
+          chatBody.scrollTop = chatBody.scrollHeight;
+        }
+      }
+      const textarea = document.getElementById('questionInput');
 
-    const chatBody = document.getElementById("chatBody");
+      let typingTimer;  // 여기부터 추천검색어
+const typingDelay = 2000;  // 2초
+const input = document.getElementById("questionInput");
 
-    // ① 사용자 말풍선
-    const userBubble = document.createElement("div");
-    userBubble.className = "chat-bubble user";
-    userBubble.textContent = text;
-    chatBody.appendChild(userBubble);
-    input.value = "";
-    chatBody.scrollTop = chatBody.scrollHeight;
-
-    // ② "입력중입니다..." 수룡이 말풍선
-    const botContainer = document.createElement("div");
-    botContainer.className = "bot-container";
-
-    const suryongImg = document.createElement("img");
-    suryongImg.src = "/static/assets/suryong.png";
-    suryongImg.alt = "수룡이";
-    suryongImg.className = "suryong-profile";
-
-    const botBubble = document.createElement("div");
-    botBubble.className = "chat-bubble bot";
-    botBubble.textContent = "입력중입니다..."; // 초기 로딩 메시지
-
-    botContainer.appendChild(suryongImg);
-    botContainer.appendChild(botBubble);
-    chatBody.appendChild(botContainer);
-    chatBody.scrollTop = chatBody.scrollHeight;
-
-    try {
-      const res = await fetch("/query", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: text })
-      });
-
-      const data = await res.json();
-
-      // ③ GPT 응답으로 메시지 업데이트
-      botBubble.textContent = data.answer || "답변을 가져오는 데 문제가 생겼어요.";
-      chatBody.scrollTop = chatBody.scrollHeight;
-
-    } catch (error) {
-      botBubble.textContent = "⚠️ 서버와 연결할 수 없어요.";
-      chatBody.scrollTop = chatBody.scrollHeight;
-    }
+input.addEventListener("input", () => {
+  clearTimeout(typingTimer);
+  if (input.value.trim()) {
+    typingTimer = setTimeout(fetchSuggestions, typingDelay);
   }
-</script>
+});
 
+async function fetchSuggestions() {
+  const text = input.value.trim();
+  if (!text) return;
+
+  try {
+    const res = await fetch("/suggest", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query: text })
+    });
+
+    const data = await res.json();
+    updateSuggestedTags(data.results);
+  } catch (e) {
+    console.warn("추천 질문 불러오기 실패", e);
+  }
+}
+
+function updateSuggestedTags(questions) {
+  const container = document.getElementById("recommendQuestions");
+  container.innerHTML = "";
+  questions.forEach(q => {
+    const tag = document.createElement("div");
+    tag.className = "recommend-question-tag";
+    tag.textContent = `#${q}`;
+    tag.onclick = () => {
+      input.value = q;
+      input.focus();
+    };
+    container.appendChild(tag);
+  });
+}
+
+    </script> 
     
   </body>
 </html>
