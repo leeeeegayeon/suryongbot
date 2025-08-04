@@ -2,6 +2,7 @@
 html, body {
   overflow-x: hidden;
 }
+
 body.chat-body-bg {
   margin: 0;
   padding: 0;
@@ -25,9 +26,6 @@ body.chat-body-bg {
   z-index: 10;
 }
 
-
-
-
 .logo-group {
   display: flex;
   align-items: center;
@@ -35,11 +33,11 @@ body.chat-body-bg {
 }
 
 .logo-img {
-  height: 70px ;
+  height: 50px ;
 }
 
 .suryong-img {
-  height: 60px;
+  height: 55px;
 }
 
 .header-buttons {
@@ -65,13 +63,14 @@ body.chat-body-bg {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  padding-bottom: 100px;
 }
 
 .chat-bubble {
   max-width: 60%;
   padding: 10px 14px;
   border-radius: 16px;
-  font-size: 15px;
+  font-size: 16px;
   line-height: 1.5;
   white-space: pre-wrap;
 }
@@ -92,16 +91,22 @@ body.chat-body-bg {
 
 /* 입력창 영역 */
 .input-area {
+  position: fixed;        /* 화면에 고정 */
+  bottom: 0;              /* 화면 하단에 붙이기 */
+  left: 0;
+  width: 100%;
   display: flex;
   align-items: center;
   padding: 10px;
   border-top: 1px solid #ccc;
   background-color: white;
+  z-index: 100;           /* 다른 요소보다 위에 */
 }
+
 
 .input-area textarea {
   flex: 1;
-  height: 80px;
+  height: 50px;
   padding: 10px 12px;
   font-size: 16px;
   border: 1px solid #6C69AD;
@@ -114,6 +119,7 @@ body.chat-body-bg {
 
 .send-btn {
   margin-left: 10px;
+  margin-right: 13px;
   width: 42px;
   height: 42px;
   border-radius: 50%;
@@ -126,6 +132,7 @@ body.chat-body-bg {
 
 .hidden {
   display: none;
+  
 } 
 
 .bot-container {
@@ -136,8 +143,27 @@ body.chat-body-bg {
 }
 
 .suryong-profile {
-  width: 38px;
-  height: 38px;
+  width: 45px;
+  height: 45px;
   border-radius: 50%;
   object-fit: contain;
+} 
+
+.recommend-questions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 12px 20px 4px;
+  background-color: white;
+}
+
+.recommend-question-tag {
+  padding: 6px 12px;
+  border: 1px solid #6C69AD;
+  border-radius: 20px;
+  font-size: 14px;
+  color: #6C69AD;
+  background-color: white;
+  cursor: pointer;
+  white-space: nowrap;
 }
