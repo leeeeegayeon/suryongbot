@@ -63,7 +63,7 @@ body.chat-body-bg {
 /* 채팅 내용 스크롤 영역 */
 .chat-container {
   flex: 1;
-  margin-top: 70px;        /* ✨ 상단 헤더만큼 아래로 밀기 */
+  margin-top: 75px;        /* ✨ 상단 헤더만큼 아래로 밀기 */
   margin-bottom: 80px;    /* ✨ 하단 입력창만큼 위로 밀기 */
   overflow-y: auto;        /* ✨ 이 부분만 스크롤되도록 */
   padding: 20px;
