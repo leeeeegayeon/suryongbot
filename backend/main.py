@@ -36,6 +36,11 @@ documents = load_paragraphs("documents.txt")
 doc_embeddings = load_embeddings()
 index = load_faiss_index()
 
+# 질문 추천 인덱스 로딩
+recommend_questions = load_paragraphs("question_candidates.txt")
+recommend_embeddings = load_embeddings("recommend_embeddings.npy")
+recommend_index = load_faiss_index("recommend_index.faiss")
+
 class QueryRequest(BaseModel):
     query: str
 
@@ -82,6 +87,23 @@ async def handle_query(request: QueryRequest):
     )
 
     return {"answer": chat_response.choices[0].message.content}
+
+@app.post("/suggest")
+async def recommend_questions_endpoint(request: QueryRequest):
+    query = request.query
+
+    embedding_response = client.embeddings.create(
+        input=query,
+        model="text-embedding-3-small"
+    )
+    query_embedding = np.array(embedding_response.data[0].embedding)
+    query_embedding = query_embedding / np.linalg.norm(query_embedding)
+
+    top_k = 3
+    scores, indices = recommend_index.search(np.array([query_embedding]), top_k)
+    similar_questions = [recommend_questions[idx] for idx in indices[0]]
+
+    return {"results": similar_questions}
 
 @app.get("/", response_class=HTMLResponse)
 async def serve_index(request: Request):
