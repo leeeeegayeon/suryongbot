@@ -240,3 +240,14 @@ body.side-open .suryong-container {
   display: none !important ;
 }
 
+.close-btn { //되돌아가기(닫기) 버튼
+  background-color: transparent;
+  border: none;
+  font-size: 16px;
+  color: #6C69AD;
+  cursor: pointer;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+
