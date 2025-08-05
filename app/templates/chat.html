@@ -32,7 +32,7 @@
       <button onclick="sendMessage()" class="send-btn">&#x2191;</button>
     </div>
 
-    <div class="recommend-questions" id="recommendQuestions">
+    <div class="recommend-questions" id="recommendQuestions"> //추천질문박스
     </div>
 
     <script>
@@ -89,14 +89,14 @@
       }
       const textarea = document.getElementById('questionInput');
 
-      let typingTimer;  // 여기부터 추천검색어
-const typingDelay = 2000;  // 2초
+let typingTimer;  // 여기부터 추천검색어
+const typingDelay = 2000;  // 2초후에 추천질문 불러오기기
 const input = document.getElementById("questionInput");
 
 input.addEventListener("input", () => {
-  clearTimeout(typingTimer);
-  if (input.value.trim()) {
-    typingTimer = setTimeout(fetchSuggestions, typingDelay);
+  clearTimeout(typingTimer); //타이핑 중에는 추천을 띄우지 않게 함
+  if (input.value.trim()) { //공백을 제거한 사용자의 현재 입력값이 있는지 확인
+    typingTimer = setTimeout(fetchSuggestions, typingDelay); 
   }
 });
 
@@ -106,30 +106,31 @@ async function fetchSuggestions() {
 
   try {
     const res = await fetch("/suggest", {
-      method: "POST",
+      method: "POST", //백엔드에 POST 요청 보내서 추천 질문 요청함.
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ query: text })
+      body: JSON.stringify({ query: text }) //사용자 입력값을 QUERY로 백엔드에 전달
     });
 
     const data = await res.json();
-    updateSuggestedTags(data.results);
+    updateSuggestedTags(data.results); //질문 리스트 화면에 표시하기 위해 여기로 넘겨준다
   } catch (e) {
     console.warn("추천 질문 불러오기 실패", e);
   }
 }
 
-function updateSuggestedTags(questions) {
+function updateSuggestedTags(questions) { //추천질문배열해주는 함수
   const container = document.getElementById("recommendQuestions");
   container.innerHTML = "";
   questions.forEach(q => {
     const tag = document.createElement("div");
     tag.className = "recommend-question-tag";
-    tag.textContent = `#${q}`;
-    tag.onclick = () => {
-      input.value = q;
+    tag.textContent = `#${q}`; //태그+질문 형태로 나옴
+    tag.onclick = () => { //태그 클릭
+      input.value = q; //클릭된 질문으로 입력창 채워넣음
       input.focus();
+      sendMessage(); //클릭 시 GPT에 질문 전송
     };
-    container.appendChild(tag);
+    container.appendChild(tag); //만들어진 추천 태그들을 화면에 하나씩 추가함
   });
 }
 
