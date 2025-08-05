@@ -6,23 +6,28 @@ html, body {
 body.chat-body-bg {
   margin: 0;
   padding: 0;
-  padding-top: 280px;
   font-family: 'Segoe UI', sans-serif;
   background-color: #ffffff;
   height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow: hidden; /* ✨ body 스크롤 제거 */
 }
 
-/* 상단 헤더 */
+/* 상단 고정 헤더 */
 .chat-header {
-  /* position: absolute; 제거하거나 주석 유지 */
-  position: absolute;
+  flex-shrink: 0;
+  position: fixed;         /* ✨ 상단 고정 */
   top: 0;
   left: 0;
   width: 100%;
-  background-color: white;  /* ← 추가된 부분 */
-  padding: 10px 20px;
+  height: 70px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  background-color: white;
+  border-bottom: 1px solid #ddd;
   z-index: 10;
 }
 
@@ -37,7 +42,7 @@ body.chat-body-bg {
 }
 
 .suryong-img {
-  height: 55px;
+  height: 60px;
 }
 
 .header-buttons {
@@ -55,15 +60,16 @@ body.chat-body-bg {
   border-radius: 4px;
 }
 
-/* 채팅 영역 */
+/* 채팅 내용 스크롤 영역 */
 .chat-container {
   flex: 1;
-  overflow-y: auto;
+  margin-top: 70px;        /* ✨ 상단 헤더만큼 아래로 밀기 */
+  margin-bottom: 100px;    /* ✨ 하단 입력창만큼 위로 밀기 */
+  overflow-y: auto;        /* ✨ 이 부분만 스크롤되도록 */
   padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding-bottom: 100px;
 }
 
 .chat-bubble {
