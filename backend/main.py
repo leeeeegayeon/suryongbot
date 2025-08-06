@@ -58,7 +58,7 @@ class QueryRequest(BaseModel):
 # LangChain용 FAISS + retriever 설정
 embedding_model = OpenAIEmbeddings(model="text-embedding-3-small", openai_api_key=os.getenv("OPENAI_API_KEY"))
 vectorstore = LangChainFAISS.load_local(
-    "index_openai/index_openai",
+    "index_openai",
     embeddings=embedding_model,
     allow_dangerous_deserialization=True
 )
