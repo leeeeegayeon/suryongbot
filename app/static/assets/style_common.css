@@ -240,7 +240,7 @@ body.side-open .suryong-container {
   display: none !important ;
 }
 
-.close-btn { //되돌아가기(닫기) 버튼
+.close-btn {
   background-color: transparent;
   border: none;
   font-size: 16px;
