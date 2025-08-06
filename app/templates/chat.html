@@ -34,7 +34,7 @@
       <button onclick="sendMessage()" class="send-btn">&#x2191;</button>
     </div>
 
-    <div class="recommend-questions" id="recommendQuestions"> //추천질문박스
+    <div class="recommend-questions" id="recommendQuestions"> 
     </div>
 
     <script>
@@ -45,7 +45,7 @@
     
         const chatBody = document.getElementById("chatBody");
     
-        // ① 사용자 말풍선
+      
         const userBubble = document.createElement("div");
         userBubble.className = "chat-bubble user";
         userBubble.textContent = text;
@@ -53,7 +53,7 @@
         input.value = "";
         chatBody.scrollTop = chatBody.scrollHeight;
     
-        // ② "입력중입니다..." 수룡이 말풍선
+       
         const botContainer = document.createElement("div");
         botContainer.className = "bot-container";
     
@@ -64,7 +64,7 @@
     
         const botBubble = document.createElement("div");
         botBubble.className = "chat-bubble bot";
-        botBubble.textContent = "입력중입니다..."; // 초기 로딩 메시지
+        botBubble.textContent = "입력중입니다..."; 
     
         botContainer.appendChild(suryongImg);
         botContainer.appendChild(botBubble);
@@ -80,7 +80,7 @@
     
           const data = await res.json();
     
-          // ③ GPT 응답으로 메시지 업데이트
+         
           botBubble.textContent = data.answer || "답변을 가져오는 데 문제가 생겼어요.";
           chatBody.scrollTop = chatBody.scrollHeight;
     
@@ -91,13 +91,13 @@
       }
       const textarea = document.getElementById('questionInput');
 
-let typingTimer;  // 여기부터 추천검색어
-const typingDelay = 2000;  // 2초후에 추천질문 불러오기기
+let typingTimer;  
+const typingDelay = 2000; 
 const input = document.getElementById("questionInput");
 
 input.addEventListener("input", () => {
-  clearTimeout(typingTimer); //타이핑 중에는 추천을 띄우지 않게 함
-  if (input.value.trim()) { //공백을 제거한 사용자의 현재 입력값이 있는지 확인
+  clearTimeout(typingTimer); 
+  if (input.value.trim()) { 
     typingTimer = setTimeout(fetchSuggestions, typingDelay); 
   }
 });
@@ -108,35 +108,35 @@ async function fetchSuggestions() {
 
   try {
     const res = await fetch("/suggest", {
-      method: "POST", //백엔드에 POST 요청 보내서 추천 질문 요청함.
+      method: "POST", 
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ query: text }) //사용자 입력값을 QUERY로 백엔드에 전달
+      body: JSON.stringify({ query: text }) 
     });
 
     const data = await res.json();
-    updateSuggestedTags(data.results); //질문 리스트 화면에 표시하기 위해 여기로 넘겨준다
+    updateSuggestedTags(data.results);
   } catch (e) {
     console.warn("추천 질문 불러오기 실패", e);
   }
 }
 
-function updateSuggestedTags(questions) { //추천질문배열해주는 함수
+function updateSuggestedTags(questions) { 
   const container = document.getElementById("recommendQuestions");
   container.innerHTML = "";
   questions.forEach(q => {
     const tag = document.createElement("div");
     tag.className = "recommend-question-tag";
-    tag.textContent = `#${q}`; //태그+질문 형태로 나옴
-    tag.onclick = () => { //태그 클릭
-      input.value = q; //클릭된 질문으로 입력창 채워넣음
+    tag.textContent = `#${q}`; 
+    tag.onclick = () => { 
+      input.value = q; 
       input.focus();
-      sendMessage(); //클릭 시 GPT에 질문 전송
+      sendMessage(); 
     };
-    container.appendChild(tag); //만들어진 추천 태그들을 화면에 하나씩 추가함
+    container.appendChild(tag); 
   });
 }
 function goToMain() {
-  window.location.href = "/index.html"; // 배포 환경에 따라 "/"일 수도 있어
+  window.location.href = "/index.html"; 
 }
 
 
