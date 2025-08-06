@@ -14,9 +14,6 @@ from langchain_community.vectorstores import FAISS as LangChainFAISS
 from langchain_openai import OpenAIEmbeddings
 from langchain.retrievers.multi_query import MultiQueryRetriever
 from langchain_community.chat_models import ChatOpenAI
-from langchain.retrievers.ensemble import EnsembleRetriever
-from langchain_community.retrievers import BM25Retriever
-from langchain_core.documents import Document
 from langchain_community.document_transformers import LongContextReorder
 
 
@@ -64,10 +61,6 @@ vectorstore = LangChainFAISS.load_local(
 )
 llm = ChatOpenAI(model="gpt-4o", temperature=0.4)
 
-# BM25 리트리버용 문서 변환
-bm25_documents = [Document(page_content=doc) for doc in documents]
-retriever_bm25 = BM25Retriever.from_documents(bm25_documents)
-retriever_bm25.k = 3
 
 # LLM 기반 MultiQuery retriever
 retriever_multi = MultiQueryRetriever.from_llm(
@@ -76,10 +69,7 @@ retriever_multi = MultiQueryRetriever.from_llm(
 )
 
 # 의미 + 키워드 기반 앙상블 리트리버
-retriever = EnsembleRetriever(
-    retrievers=[retriever_bm25, retriever_multi],
-    weights=[0.4, 0.6]
-)
+retriever = retriever_multi
 
 @app.post("/query")
 async def handle_query(request: QueryRequest):
@@ -105,34 +95,29 @@ async def handle_query(request: QueryRequest):
         source_pages.append(source)
 
     retrieved = "\n\n".join(retrieved_docs)
-    unique_sources = sorted(set(source_pages))
-    source_note = f"(위 답변은 수시모집요강 {', '.join(unique_sources)}을 참고하여 작성되었습니다.)"
 
     # 4. GPT 프롬프트 구성
-    prompt = f"""너는 성신여자대학교 입시를 안내하는 챗봇 "수룡이"야.  
-성신여대를 지원하려는 수험생과 학부모에게 문서 기반으로 친절하고 정확한 정보를 제공하는 게 너의 역할이야.
+    prompt = f"""너는 성신여자대학교의 입시 안내를 도와주는 챗봇 "수룡이"야.  
+        성신여대를 지원하고자 하는 수험생과 학부모에게 정확하고 친절한 정보를 제공하는 것이 너의 역할이야.
 
-[문서 내용]  
-{retrieved}
+        [문서 내용]  
+        {retrieved}
 
-[출처 정보]  
-{source_note}
+        [사용자 질문]  
+        {query}
 
-[사용자 질문]  
-{query}
+        다음 기준에 따라 답변을 작성해줘. 반드시 **한국어**로 답해.
 
-다음 기준에 따라 **한국어로** 답해.
+        1. 문서에 관련 정보가 있을 경우, 신뢰할 수 있도록 문서에 기반한 내용을 바탕으로 정확하게 설명해줘.
+        2. 문서에서 답을 찾을 수 없다면, "자세한 사항은 성신여자대학교 입학처 홈페이지의 입시요강을 참고하거나, 입학처(02-920-2000)에 문의해 주세요."라는 문장을 꼭 포함시켜.
+        3. 질문이 입시 관련이 아니라면(예: 점심 메뉴 추천, 잡담 등), 수룡이라는 캐릭터를 유지하면서도 **가볍고 친근하게 스몰토크**로 답해줘. 단, 너무 장황하게 늘어놓지는 말고 핵심만 짧고 유쾌하게 말해.
+        4. 모든 대답은 수룡의 정체성(성신여대 도우미, 친절하고 똑똑한 용 캐릭터)을 유지한 말투로 작성해줘.
+        5. 입시 정보에 대해 답변할 때 인삿말은 매번 하지 않아도 돼.
+        6. 문서에서 가져온 정보를 활용할 때는, 각각의 문단 끝에 반드시 출처를 “(수시모집요강 p.xx 참고)” 형식으로 포함시켜줘.
+        7. 만약 질문이 단어 하나만 포함된 너무 짧은 질문이거나, 예를 들어 "모집인원"처럼 불분명한 키워드만 있을 경우에는 아래처럼 답변해줘:
+        "죄송해요, 질문이 조금 불분명해요. 어떤 모집에 대해 궁금하신가요? 구체적으로 알려주시면 더 정확하게 안내해드릴 수 있어요! 😊"
 
-1. 문서에 관련 정보가 있으면 그 내용을 바탕으로 정확하게 답해. 근거 없는 추측은 하지 마.
-2. 문서에서 답을 찾을 수 없다면, 다음 문장을 꼭 포함시켜:  
-"자세한 사항은 성신여자대학교 입학처 홈페이지의 입시요강을 참고하거나, 입학처(02-920-2000)에 문의해 주세요."
-3. 입시 질문이 아닌 경우에는 수룡이 캐릭터를 유지해서 짧고 유쾌하게 스몰토크해.
-4. 항상 수룡이라는 캐릭터의 말투(친절하고 똑똑한 용)를 유지해.
-5. 문서에 출처가 포함되어 있어도, 답변 본문에는 넣지 말고, 마지막에 아래 형식으로 한 줄만 붙여줘:  
-(위 답변은 수시모집요강 p.16, p.17을 참고하여 작성되었습니다.)
-6. 질문이 너무 짧거나 불분명한 경우엔 이렇게 말해줘:  
-"죄송해요, 질문이 조금 불분명해요. 어떤 모집에 대해 궁금하신가요? 구체적으로 알려주시면 더 정확하게 안내해드릴 수 있어요! 😊"
-"""
+        """
 
     chat_response = client.chat.completions.create(
         model="gpt-4o",
