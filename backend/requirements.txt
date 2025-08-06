@@ -4,8 +4,12 @@ pydantic
 openai
 python-dotenv
 jinja2
+aiofiles
 langchain
 langchain-community
 langchain-openai
 langchain-core
 faiss-cpu
+rank_bm25
+numpy
+tiktoken
