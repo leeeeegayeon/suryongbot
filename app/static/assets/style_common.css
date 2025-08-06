@@ -270,8 +270,8 @@ body.side-open .suryong-container {
 }
 
 .close-btn img.exit-icon {
-  width: 3px;  /* 너가 원하는 크기로 조절 가능 */
-  height: 3px;
+  width: 27x;  /* 너가 원하는 크기로 조절 가능 */
+  height: 27px;
 }
 
 
@@ -300,6 +300,32 @@ body.side-open .suryong-container {
 
 .menu-item:hover {
   background-color: #f5f5f5; /* 선택사항 */
+}
+
+/* 서브메뉴 숨기기 */
+.submenu {
+  display: none;
+  padding-left: 16px;
+}
+
+.has-submenu > .submenu-toggle {
+  background: none;
+  border: none;
+  font-size: 16px;
+  padding: 16px 0;
+  text-align: left;
+  width: 100%;
+  cursor: pointer;
+  color: black;
+  border-bottom: 1px solid #ccc;
+}
+
+.submenu li a {
+  font-size: 15px;
+  display: block;
+  padding: 10px 0;
+  border-bottom: 1px solid #eee;
+  color: #444;
 }
 
 
