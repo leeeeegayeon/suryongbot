@@ -226,28 +226,81 @@ main {
   width: 250px;
   height: 100%;
   background-color: white;
-  box-shadow: -2px 0 8px rgba(0,0,0,0.2);
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
   transition: right 0.3s ease-in-out;
   z-index: 999;
-  padding: 40px 20px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  font-family: 'Noto Sans KR', sans-serif;
 }
 
 .side-menu.open {
   right: 0;
 }
 
+.side-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.side-menu ul li a {
+  color: black;
+  text-decoration: none;
+  display: block;
+  padding: 16px 0;
+  border-bottom: 1px solid #ccc;
+  font-size: 16px;
+}
+
 body.side-open .suryong-container {
-  display: none !important ;
+  display: none !important;
 }
 
 .close-btn {
-  background-color: transparent;
+  background: none;
   border: none;
-  font-size: 16px;
-  color: #6C69AD;
   cursor: pointer;
-  margin-bottom: 20px;
-  text-align: left;
+  padding: 0;
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
 }
+
+.close-btn img.exit-icon {
+  width: 28px;  /* 너가 원하는 크기로 조절 가능 */
+  height: 28px;
+}
+
+
+/* 메뉴 섹션 스타일 */
+.menu-section {
+  border-top: 1px solid #eee;
+  padding-top: 12px;
+  margin-top: 12px;
+}
+
+.menu-section:first-child {
+  border-top: none;
+  padding-top: 0;
+  margin-top: 0;
+}
+
+.menu-item {
+  padding: 16px 0;
+  border-bottom: 1px solid #ccc;
+  color: black;
+  font-size: 16px;
+  cursor: pointer;
+  text-decoration: none;
+  font-weight: 400;
+}
+
+.menu-item:hover {
+  background-color: #f5f5f5; /* 선택사항 */
+}
+
 
 
