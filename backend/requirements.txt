@@ -10,6 +10,6 @@ langchain-community
 langchain-openai
 langchain-core
 faiss-cpu
-rank_bm25
 numpy
 tiktoken
+
