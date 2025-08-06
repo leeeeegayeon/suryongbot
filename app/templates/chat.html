@@ -19,6 +19,8 @@
         <div class="header-icon"></div>
         <div class="header-menu"></div>
       </div>
+      <!-- ✅ 메인으로 버튼 추가 -->
+      <button class="go-home-btn" onclick="goToMain()" title="메인으로"></button>
     </div>
 
     <!-- 채팅 내용 -->
@@ -133,6 +135,11 @@ function updateSuggestedTags(questions) { //추천질문배열해주는 함수
     container.appendChild(tag); //만들어진 추천 태그들을 화면에 하나씩 추가함
   });
 }
+function goToMain() {
+  window.location.href = "/index.html"; // 배포 환경에 따라 "/"일 수도 있어
+}
+
+
 
     </script> 
     
