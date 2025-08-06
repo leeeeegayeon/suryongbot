@@ -41,9 +41,29 @@
     </button>
     
     <ul>
-      <li><a href="#">달력</a></li>
-      <li><a href="#">모집 요강</a></li>
-      <li><a href="#">캠퍼스 안내</a></li>
+      <li><a href="#">입학전형 FAQ</a></li>
+      <li class="has-submenu">
+        <button class="submenu-toggle" onclick="toggleSubMenu()">모집 요강</button>
+        <ul class="submenu" id="recruitSubmenu">
+          <li>
+            <a href="/static/assets/수시_모집요강.pdf" target="_blank" rel="noopener noreferrer">
+                - 수시 모집요강
+            </a>
+          </li>
+          <li>
+            <a href="/static/assets/정시_모집요강.pdf" target="_blank" rel="noopener noreferrer">
+                - 정시 모집요강
+            </a>
+          </li>
+        </ul>
+      </li>
+      
+      <li>
+        <a href="https://www.youtube.com/watch?v=wyEsALTHOHA" target="_blank" rel="noopener noreferrer">
+          캠퍼스 소개
+        </a>
+      </li>
+      
     </ul>
   </div>
 
@@ -73,6 +93,11 @@
     const menu = document.getElementById("sideMenu");
     menu.classList.remove("open");
     document.body.classList.remove("side-open");
+  }
+
+  function toggleSubMenu() {
+    const submenu = document.getElementById("recruitSubmenu");
+    submenu.style.display = submenu.style.display === "block" ? "none" : "block";
   }
 </script>
 </html>
