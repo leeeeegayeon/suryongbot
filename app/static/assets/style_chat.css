@@ -36,7 +36,7 @@ body.chat-body-bg {
 }
 
 .suryong-img {
-  height: 60px;
+  height:75px;
 }
 
 .header-buttons {
@@ -45,14 +45,6 @@ body.chat-body-bg {
   gap: 8px;
 }
 
-
-.header-icon,
-.header-menu {
-  width: 20px;
-  height: 20px;
-  background-color: #eee;
-  border-radius: 4px;
-}
 
 /* 채팅 내용 스크롤 영역 */
 .chat-container {
@@ -156,6 +148,7 @@ body.chat-body-bg {
   gap: 10px;
   padding: 12px 20px 4px;
   background-color: white;
+  margin-bottom: 100px;
 }
 
 .recommend-question-tag {
@@ -191,3 +184,7 @@ body.chat-body-bg {
   background-color: #e0e0e0;
 }
 
+textarea {
+  white-space: pre-wrap;
+  line-height: 1.6;
+}
