@@ -13,11 +13,7 @@
         <img src="/static/assets/logo.png" alt="성신여대 로고" class="logo-img" />
       </div>
       <div class="header-buttons">
-        <div class="dot green"></div>
-        <div class="dot yellow"></div>
-        <div class="dot red"></div>
         <div class="header-icon"></div>
-        <div class="header-menu"></div>
       </div>
       <!-- ✅ 메인으로 버튼 추가 -->
       <button class="go-home-btn" onclick="goToMain()" title="메인으로"></button>
@@ -138,10 +134,12 @@ function updateSuggestedTags(questions) {
 function goToMain() {
   window.location.href = "/"; 
 }
-
-
-
-    </script> 
-    
+textarea.addEventListener("keydown", function (e) {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();       // 줄바꿈 방지
+    sendMessage();            // 기존 함수 실행
+  }
+});
+    </script>    
   </body>
 </html>
