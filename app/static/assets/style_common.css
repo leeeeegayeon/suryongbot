@@ -198,6 +198,7 @@ main {
 
 
 .hamburger-menu {
+  margin-top: 6px;
   position: fixed;
   top: 20px;
   right: 20px;
