@@ -158,3 +158,8 @@ async def serve_chat(request: Request):
 async def serve_faq(request: Request):
     return templates.TemplateResponse("common_faq.html", {"request": request})
 
+@app.get("/susi_faq", response_class=HTMLResponse)
+async def serve_susi_faq(request: Request):
+    return templates.TemplateResponse("susi_faq.html", {"request": request})
+
+
