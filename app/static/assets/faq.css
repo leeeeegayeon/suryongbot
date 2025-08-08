@@ -1,58 +1,78 @@
-/* 기본 */
-body{
-  font-family:'Noto Sans KR',sans-serif;
-  background:#f7f7f7;
-  margin:0;
+/* 폰트 기본 */
+* { box-sizing: border-box; }
+body {
+  margin: 0; padding: 32px 16px;
+  font-family: 'Noto Sans KR', sans-serif; color: #222;
+  background: #f5f6fb;
 }
 
 /* 제목 */
-.faq-title{
-  text-align:center;
-  font-size:1.8rem;   /* 과하게 크지 않게 */
-  font-weight:700;    /* 굵은 고딕 */
-  color:#222;
-  margin-top:28px;    /* 화면 조금 아래로 */
-  margin-bottom:18px;
+.faq-title {
+  max-width: 980px; margin: 0 auto 16px;
+  font-size: 28px; font-weight: 700; color: #444;
 }
 
 /* 목록 박스 */
 .faq-wrap{
-  max-width:980px;
-  margin:56px auto 40px; /* 기존 40px에서 살짝 더 내려줌(상단 +16px) */
+  max-width:1100px;
+  margin:56px auto 40px; /* 상단 여백 살짝 확대 */
   background:#fff;
   border-radius:12px;
   box-shadow:0 4px 12px rgba(0,0,0,.06);
   overflow:hidden;
+  padding: 8px 0;
 }
 
-.faq-item{border-bottom:1px solid #eee}
-.faq-row{display:flex;align-items:center;gap:12px;padding:18px 20px}
+/* 항목 */
+.faq-item { border-top: 1px solid #eee; }
+.faq-item:first-child { border-top: 0; }
 
-/* Q 마크: 연보라 배경 + 검정 글씨 */
+/* 질문 줄 */
+.faq-row{
+  display:flex; align-items:center; gap:12px;
+  padding:16px 20px;
+}
 .q-mark{
-  width:32px;height:32px;border-radius:50%;
-  background:#E6E0F8;color:#000;
-  display:flex;align-items:center;justify-content:center;
-  font-weight:700;flex-shrink:0;
+  flex:0 0 auto;
+  width:28px; height:28px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  background:#6C69AD; color:#fff; font-weight:700;
 }
-
-.q-text{font-weight:700;font-size:18px;color:#1f2937;flex:1}
-
-/* 화살표 버튼 */
+.q-text{ flex:1 1 auto; font-size:16px; font-weight:700; color:#333; }
 .arrow-btn{
-  border:none;background:transparent;font-size:20px;cursor:pointer;
-  line-height:1;user-select:none;
+  flex:0 0 auto;
+  width:32px; height:32px; border-radius:8px;
+  border:1px solid #d6d6f2; background:#f6f6ff; color:#6C69AD;
+  font-size:16px; cursor:pointer;
 }
 
 /* 답변 박스 */
-.answer{display:none;padding:0 20px 18px 20px}
-.answer-box{display:flex;align-items:flex-start;gap:10px;line-height:1.7;color:#374151}
-
-/* A 마크: 검정 배경 */
+.answer { background:#fafafe; }
+.answer-box{
+  display:flex; gap:12px;
+  padding:16px 20px 20px;
+}
 .a-mark{
-  width:28px;height:28px;border-radius:50%;background:#000;color:#fff;
-  display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;margin-top:2px;
+  flex:0 0 auto;
+  width:28px; height:28px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  background:#36b37e; color:#fff; font-weight:700;
+}
+.answer-box > div:last-child{
+  line-height:1.7; color:#444; white-space:pre-wrap;
 }
 
-.show{display:block;animation:fade .22s ease-in}
-@keyframes fade{from{opacity:0}to{opacity:1}}
+/* 뒤로가기 버튼 */
+.back-btn {
+    display: inline-block;
+    margin: 20px;
+    font-size: 16px;
+    color: #4b4b4b;
+    text-decoration: none;
+    background: #f2f2f2;
+    padding: 6px 12px;
+    border-radius: 6px;
+}
+.back-btn:hover {
+    background: #e2e2e2;
+}
