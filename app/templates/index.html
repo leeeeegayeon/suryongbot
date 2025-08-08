@@ -41,7 +41,15 @@
     </button>
     
     <ul>
-      <li><a href="#">입학전형 FAQ</a></li>
+      <li class="has-submenu">
+  <button class="submenu-toggle" onclick="toggleFaqSubMenu()">입학전형 FAQ</button>
+  <ul class="submenu" id="faqSubmenu">
+    <li><a href="/faq?tab=공통">- 공통 FAQ</a></li>
+    <li><a href="/faq?tab=수시">- 수시 FAQ</a></li>
+    <li><a href="/faq?tab=정시">- 정시 FAQ</a></li>
+  </ul>
+</li>
+
   
       <li class="has-submenu">
         <button class="submenu-toggle" onclick="toggleSubMenu()">모집 요강</button>
@@ -98,6 +106,11 @@
 
   function toggleSubMenu() {
     const submenu = document.getElementById("recruitSubmenu");
+    submenu.style.display = submenu.style.display === "block" ? "none" : "block";
+  }
+  
+  function toggleFaqSubMenu() {
+    const submenu = document.getElementById("faqSubmenu");
     submenu.style.display = submenu.style.display === "block" ? "none" : "block";
   }
 </script>
