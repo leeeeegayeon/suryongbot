@@ -1,0 +1,58 @@
+/* 기본 */
+body{
+  font-family:'Noto Sans KR',sans-serif;
+  background:#f7f7f7;
+  margin:0;
+}
+
+/* 제목 */
+.faq-title{
+  text-align:center;
+  font-size:1.8rem;   /* 과하게 크지 않게 */
+  font-weight:700;    /* 굵은 고딕 */
+  color:#222;
+  margin-top:28px;    /* 화면 조금 아래로 */
+  margin-bottom:18px;
+}
+
+/* 목록 박스 */
+.faq-wrap{
+  max-width:980px;
+  margin:56px auto 40px; /* 기존 40px에서 살짝 더 내려줌(상단 +16px) */
+  background:#fff;
+  border-radius:12px;
+  box-shadow:0 4px 12px rgba(0,0,0,.06);
+  overflow:hidden;
+}
+
+.faq-item{border-bottom:1px solid #eee}
+.faq-row{display:flex;align-items:center;gap:12px;padding:18px 20px}
+
+/* Q 마크: 연보라 배경 + 검정 글씨 */
+.q-mark{
+  width:32px;height:32px;border-radius:50%;
+  background:#E6E0F8;color:#000;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;flex-shrink:0;
+}
+
+.q-text{font-weight:700;font-size:18px;color:#1f2937;flex:1}
+
+/* 화살표 버튼 */
+.arrow-btn{
+  border:none;background:transparent;font-size:20px;cursor:pointer;
+  line-height:1;user-select:none;
+}
+
+/* 답변 박스 */
+.answer{display:none;padding:0 20px 18px 20px}
+.answer-box{display:flex;align-items:flex-start;gap:10px;line-height:1.7;color:#374151}
+
+/* A 마크: 검정 배경 */
+.a-mark{
+  width:28px;height:28px;border-radius:50%;background:#000;color:#fff;
+  display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;margin-top:2px;
+}
+
+.show{display:block;animation:fade .22s ease-in}
+@keyframes fade{from{opacity:0}to{opacity:1}}
