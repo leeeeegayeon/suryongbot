@@ -153,3 +153,8 @@ async def serve_index(request: Request):
 @app.get("/chat", response_class=HTMLResponse)
 async def serve_chat(request: Request):
     return templates.TemplateResponse("chat.html", {"request": request})
+    
+@app.get("/faq", response_class=HTMLResponse)
+async def serve_faq(request: Request):
+    return templates.TemplateResponse("common_faq.html", {"request": request})
+
