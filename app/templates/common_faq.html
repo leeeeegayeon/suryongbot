@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>공통 FAQ</title>
+  <!-- 고딕체 -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet" />
+  <!-- 분리된 CSS -->
+  <link rel="stylesheet" href="/static/assets/faq.css" />
+</head>
+<body>
+
+  <h2 class="faq-title">공통 FAQ</h2>
+
+  <div class="faq-wrap" id="faq">
+    <!-- 1 -->
+    <div class="faq-item">
+      <div class="faq-row">
+        <div class="q-mark">Q</div>
+        <div class="q-text">[입학전형] 경쟁률은 어떻게 되나요? 가장 경쟁률이 낮은 전공이 어디인가요?</div>
+        <button class="arrow-btn" aria-label="답변 열기" aria-expanded="false">˅</button>
+      </div>
+      <div class="answer">
+        <div class="answer-box">
+          <div class="a-mark">A</div>
+          <div>부동산대학원 전체 평균 경쟁률은 약 5:1 수준입니다. 학기별 정원(100명) 내에서 전공별 지원율에 따라 선발인원이 조정되므로 특정 전공이 항상 낮거나 높지는 않습니다.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2 -->
+    <div class="faq-item">
+      <div class="faq-row">
+        <div class="q-mark">Q</div>
+        <div class="q-text">[입학전형] 지원한 전공을 변경하고 싶습니다.</div>
+        <button class="arrow-btn" aria-label="답변 열기" aria-expanded="false">˅</button>
+      </div>
+      <div class="answer">
+        <div class="answer-box">
+          <div class="a-mark">A</div>
+          <div>원서접수 완료 후 전공 변경은 불가합니다. 접수 전 지원서 수정 메뉴에서 전공을 다시 선택해 주세요.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3 -->
+    <div class="faq-item">
+      <div class="faq-row">
+        <div class="q-mark">Q</div>
+        <div class="q-text">[입학전형] 면접전형은 어떻게 준비하나요? 서류전형 결과는 언제 나오나요?</div>
+        <button class="arrow-btn" aria-label="답변 열기" aria-expanded="false">˅</button>
+      </div>
+      <div class="answer">
+        <div class="answer-box">
+          <div class="a-mark">A</div>
+          <div>면접은 제출서류 기반의 인성·전공적합성 확인이 중심이며, 서류전형 합격자는 입학처 공지에 맞춰 발표됩니다.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 화살표만 클릭 시 열리고 닫힘 (처음은 닫힘: ˅)
+    document.querySelectorAll('.faq-item').forEach(item => {
+      const btn = item.querySelector('.arrow-btn');
+      const answer = item.querySelector('.answer');
+
+      btn.addEventListener('click', () => {
+        const open = answer.classList.toggle('show'); // true면 열림
+        btn.textContent = open ? '˄' : '˅';
+        btn.setAttribute('aria-expanded', String(open));
+      });
+    });
+  </script>
+</body>
+</html>
