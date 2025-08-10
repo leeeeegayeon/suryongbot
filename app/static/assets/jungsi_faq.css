@@ -1,82 +1,48 @@
-/* 페이지 배경/레이아웃 */
-.notice-wrap{
-  max-width: 980px;
-  margin: 48px auto;
-  padding: 0 16px;
+/* 공지 전체 영역 */
+.notice-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+  padding: 20px;
+  background-color: #f9f9fb;
 }
 
-.notice-card{
+/* 안내 카드 */
+.notice-card {
+  max-width: 500px;
+  width: 100%;
   background: #fff;
-  border-radius: 14px;
-  box-shadow: 0 6px 16px rgba(0,0,0,.08);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
   padding: 32px 24px;
   text-align: center;
-  border: 1px solid #f0f1f6;
 }
 
-/* 아이콘/타이틀/본문 */
-.notice-icon{
-  font-size: 44px;
-  line-height: 1;
-  margin-bottom: 12px;
+/* 아이콘 */
+.notice-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
 }
 
-.notice-title{
-  margin: 0 0 10px;
+/* 제목 */
+.notice-title {
   font-size: 22px;
-  font-weight: 800;
+  font-weight: 700;
+  margin-bottom: 12px;
   color: #333;
 }
 
-.notice-desc{
-  margin: 0 auto 20px;
+/* 설명 */
+.notice-desc {
   font-size: 15px;
-  line-height: 1.8;
+  line-height: 1.6;
   color: #555;
-  max-width: 640px;
-  white-space: pre-wrap;
 }
 
-/* 버튼 */
-.notice-actions{
-  display: inline-flex;
-  gap: 10px;
-  margin: 8px 0 6px;
-}
-
-.notice-btn{
-  display: inline-block;
-  padding: 10px 14px;
-  border-radius: 10px;
-  border: 1px solid #d6d6f2;
-  text-decoration: none;
-  font-weight: 700;
-  font-size: 14px;
-  color: #6C69AD;
-  background: #f6f6ff;
-  transition: transform .04s ease, box-shadow .2s ease;
-}
-.notice-btn:hover{
-  transform: translateY(-1px);
-  box-shadow: 0 4px 10px rgba(0,0,0,.06);
-}
-.notice-btn.primary{
-  background: #6C69AD;
-  border-color: #6C69AD;
-  color: #fff;
-}
-
-/* 각주 */
-.notice-footnote{
-  margin-top: 14px;
-  font-size: 12px;
-  color: #888;
-}
-
-/* 반응형 */
-@media (max-width: 520px){
-  .notice-card{ padding: 24px 18px; }
-  .notice-title{ font-size: 20px; }
-  .notice-desc{ font-size: 14px; }
-  .notice-btn{ font-size: 13px; }
+/* 불필요해진 버튼 영역/스타일 제거 */
+.notice-actions,
+.notice-btn,
+.notice-footnote {
+  display: none;
 }
