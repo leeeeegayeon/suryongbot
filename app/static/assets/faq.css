@@ -62,18 +62,23 @@ body {
   line-height:1.7; color:#444; white-space:pre-wrap;
 }
 
-/* 뒤로가기 버튼 */
-.back-btn {
-    display: inline-block;
-    margin: 20px;
-    font-size: 16px;
-    color: #4b4b4b;
-    text-decoration: none;
-    background: #f2f2f2;
-    padding: 6px 12px;
-    border-radius: 6px;
+.go-home-btn {
+  display: inline-block;
+  margin: 20px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  background: #6C69AD; /* 보라색 톤 */
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s ease;
 }
-.back-btn:hover {
-    background: #e2e2e2;
+
+.go-home-btn:hover {
+  background: #5856a0;
 }
+
+
 
