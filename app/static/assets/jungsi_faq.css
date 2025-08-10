@@ -48,20 +48,25 @@
 }
 
 .go-home-btn {
-  display: inline-block;
-  margin: 20px;
-  font-size: 16px;
-  font-weight: 600;
-  color: #fff;
-  background: #6C69AD; /* 보라색 톤 */
+  position: absolute;
+  top: 20px;
+  right: 50px;
+  width: 40px;
+  height: 40px;
+  background-color: #f1f1f1;
   border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
+  border-radius: 8px;
+  background-image: url('/static/assets/home-icon.svg'); /* 아래 설명 참고 */
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 25px 25px;
   cursor: pointer;
-  transition: background 0.3s ease;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  transition: background-color 0.2s ease;
 }
 
 .go-home-btn:hover {
-  background: #5856a0;
+  background-color: #e0e0e0;
 }
+
 
