@@ -87,7 +87,7 @@
       }
       const textarea = document.getElementById('questionInput');
 
-let typingTimer;  
+      let typingTimer;  
 const typingDelay = 1000; 
 const input = document.getElementById("questionInput");
 
@@ -110,16 +110,19 @@ async function fetchSuggestions() {
     });
 
     const data = await res.json();
-    updateSuggestedTags(data.results);
+    const results = Array.isArray(data?.results) ? data.results.slice(0, 3) : [];
+    updateSuggestedTags(results);
   } catch (e) {
     console.warn("추천 질문 불러오기 실패", e);
+    updateSuggestedTags([]);
   }
 }
 
 function updateSuggestedTags(questions) { 
   const container = document.getElementById("recommendQuestions");
   container.innerHTML = "";
-  questions.forEach(q => {
+  const safeList = Array.isArray(questions) ? questions : [];
+  safeList.forEach(q => {
     const tag = document.createElement("div");
     tag.className = "recommend-question-tag";
     tag.textContent = `#${q}`; 
@@ -134,6 +137,9 @@ function updateSuggestedTags(questions) {
 function goToMain() {
   window.location.href = "/"; 
 }
+
+
+
 textarea.addEventListener("keydown", function (e) {
   if (e.key === "Enter" && !e.shiftKey) {
     e.preventDefault();       // 줄바꿈 방지
