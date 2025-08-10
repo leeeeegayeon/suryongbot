@@ -11,7 +11,9 @@
   <link rel="stylesheet" href="/static/assets/jungsi_faq.css" />
 </head>
 <body>
-  <a href="/" class="back-btn">← 뒤로가기</a>
+  <!-- ✅ 메인으로 버튼 추가 -->
+<button class="go-home-btn" onclick="goToMain()" title="메인으로">메인으로</button>
+
 
   <h2 class="faq-title">정시 FAQ</h2>
 
@@ -24,6 +26,13 @@
       </p>
     </div>
   </div>
+<script>
+  function goToMain() {
+    window.location.href = "/"; // 메인(index.html)으로 이동
+  }
+</script>
+
 </body>
 </html>
+
 
