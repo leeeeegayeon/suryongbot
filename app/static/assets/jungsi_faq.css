@@ -1,0 +1,82 @@
+/* 페이지 배경/레이아웃 */
+.notice-wrap{
+  max-width: 980px;
+  margin: 48px auto;
+  padding: 0 16px;
+}
+
+.notice-card{
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 6px 16px rgba(0,0,0,.08);
+  padding: 32px 24px;
+  text-align: center;
+  border: 1px solid #f0f1f6;
+}
+
+/* 아이콘/타이틀/본문 */
+.notice-icon{
+  font-size: 44px;
+  line-height: 1;
+  margin-bottom: 12px;
+}
+
+.notice-title{
+  margin: 0 0 10px;
+  font-size: 22px;
+  font-weight: 800;
+  color: #333;
+}
+
+.notice-desc{
+  margin: 0 auto 20px;
+  font-size: 15px;
+  line-height: 1.8;
+  color: #555;
+  max-width: 640px;
+  white-space: pre-wrap;
+}
+
+/* 버튼 */
+.notice-actions{
+  display: inline-flex;
+  gap: 10px;
+  margin: 8px 0 6px;
+}
+
+.notice-btn{
+  display: inline-block;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid #d6d6f2;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 14px;
+  color: #6C69AD;
+  background: #f6f6ff;
+  transition: transform .04s ease, box-shadow .2s ease;
+}
+.notice-btn:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0,0,0,.06);
+}
+.notice-btn.primary{
+  background: #6C69AD;
+  border-color: #6C69AD;
+  color: #fff;
+}
+
+/* 각주 */
+.notice-footnote{
+  margin-top: 14px;
+  font-size: 12px;
+  color: #888;
+}
+
+/* 반응형 */
+@media (max-width: 520px){
+  .notice-card{ padding: 24px 18px; }
+  .notice-title{ font-size: 20px; }
+  .notice-desc{ font-size: 14px; }
+  .notice-btn{ font-size: 13px; }
+}
