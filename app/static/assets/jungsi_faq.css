@@ -46,3 +46,22 @@
 .notice-footnote {
   display: none;
 }
+
+.go-home-btn {
+  display: inline-block;
+  margin: 20px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  background: #6C69AD; /* 보라색 톤 */
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.go-home-btn:hover {
+  background: #5856a0;
+}
+
