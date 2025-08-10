@@ -63,18 +63,17 @@ body {
 }
 
 .go-home-btn {
-  position: absolute;
-  top: 20px;
-  right: 50px;
+  display: inline-block;    /* .back-btn과 동일 */
+  margin: 20px;             /* .back-btn과 동일 */
   width: 40px;
   height: 40px;
   background-color: #f1f1f1;
   border: none;
   border-radius: 8px;
-  background-image: url('/static/assets/home-icon.svg'); /* 아래 설명 참고 */
+  background-image: url('/static/assets/home-icon.svg');
   background-repeat: no-repeat;
   background-position: center;
-  background-size: 25px 25px;
+  background-size: 28px 28px;
   cursor: pointer;
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
   transition: background-color 0.2s ease;
@@ -83,6 +82,8 @@ body {
 .go-home-btn:hover {
   background-color: #e0e0e0;
 }
+
+
 
 
 
