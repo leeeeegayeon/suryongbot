@@ -162,4 +162,9 @@ async def serve_faq(request: Request):
 async def serve_susi_faq(request: Request):
     return templates.TemplateResponse("susi_faq.html", {"request": request})
 
+@app.get("/jungsi_faq", response_class=HTMLResponse)
+async def serve_jungsi_faq(request: Request):
+    return templates.TemplateResponse("jungsi_faq.html", {"request": request})
+
+
 
