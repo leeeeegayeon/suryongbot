@@ -321,3 +321,14 @@ async def serve_chat(request: Request):
 @app.get("/jungsi_faq", response_class=HTMLResponse)
 async def serve_jungsi_faq(request: Request):
     return templates.TemplateResponse("jungsi_faq.html", {"request": request})
+    
+# 공통 FAQ 페이지
+@app.get("/common-faq", response_class=HTMLResponse)
+async def serve_common_faq(request: Request):
+    return templates.TemplateResponse("common_faq.html", {"request": request})
+
+# 수시 FAQ 페이지
+@app.get("/susi-faq", response_class=HTMLResponse)
+async def serve_susi_faq(request: Request):
+    return templates.TemplateResponse("susi_faq.html", {"request": request})
+
