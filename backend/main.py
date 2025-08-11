@@ -317,7 +317,7 @@ async def serve_index(request: Request):
 async def serve_chat(request: Request):
     return templates.TemplateResponse("chat.html", {"request": request})
 
-#FAQ
+# 정시 FAQ 페이지
 @app.get("/jungsi_faq", response_class=HTMLResponse)
 async def serve_jungsi_faq(request: Request):
     return templates.TemplateResponse("jungsi_faq.html", {"request": request})
@@ -331,4 +331,5 @@ async def serve_common_faq(request: Request):
 @app.get("/susi-faq", response_class=HTMLResponse)
 async def serve_susi_faq(request: Request):
     return templates.TemplateResponse("susi_faq.html", {"request": request})
+
 
