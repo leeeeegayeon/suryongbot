@@ -130,9 +130,11 @@ async def handle_query(request: QueryRequest):
                 2. 입시 관련 질문이 아니라면(예: 점심 메뉴 추천, 잡담 등), **가볍고 친근하게 스몰토크**로 답해줘.
                 3. 인삿말은 매번 하지 않아도 돼.
                 4. 의도를 알 수 없는 질문이나 키워드만 있을 경우에는 이렇게 답변해줘: "죄송해요, 질문이 조금 불분명해요. 구체적으로 알려주시면 더 정확하게 안내해드릴 수 있어요! 😊"
-                5. 학과명이나 전형명을 언급하지 않고 모집 인원에 대한 질문을 하면, 명시해서 다시 물어봐달라고 해줘.
+                5. 학과명이나 전형명을 언급하지 않고 모집 인원에 대한 질문을 하면, 명시해서 다시 물어보라고 안내해줘.
                 6. 학생부 교과 전형의 모집인원에 관한 질문이라면 다음을 참고 해서 답해줘:
                     학생부 교과 전형으로는 간호대학(자연), 사범대학 외의 학과를 제외하고 모집하지 않아.
+                7. 모집단위를 언급하지 않고 특성화고교출신자 기준학과에 대한 질문을 하면 , 명시해서 다시 물어보라고 안내해줘.
+                
                 """
 
     chat_response = client.chat.completions.create(
@@ -192,7 +194,7 @@ async def handle_query(request: QueryRequest):
             for d, s in posthoc_docs:
                 inline = _parse_inline_source(d.page_content)
                 if inline:
-                    citation_sentence = f"(본 내용은 입시요강 {inline}를 참고하여 작성되었습니다.)"
+                    citation_sentence = f"(본 내용은 2026 수시모집요강 {inline}를 참고하여 작성되었습니다.)"
                     break
             if citation_sentence:
                 answer = answer.rstrip() + " " + citation_sentence
