@@ -1,4 +1,4 @@
-#main.py
+# main.py
 from fastapi import FastAPI, Request
 from pydantic import BaseModel
 from chatbot_faiss_utils import *
@@ -46,8 +46,10 @@ recommend_questions = load_paragraphs("question_candidates.txt")
 recommend_embeddings = load_embeddings("recommend_embeddings.npy")
 recommend_index = load_faiss_index("recommend_index.faiss")
 
+
 class QueryRequest(BaseModel):
     query: str
+
 
 # LangChain용 FAISS + retriever 설정
 embedding_model = OpenAIEmbeddings(model="text-embedding-3-small", openai_api_key=os.getenv("OPENAI_API_KEY"))
@@ -67,6 +69,7 @@ for i, doc_id in enumerate(vectorstore.index_to_docstore_id):
         # doc이 문자열이므로 그대로 해시값 계산
         DOCROW_BY_HASH[hash(doc)] = i
 
+
 # 특정 문단(doc)의 임베딩 벡터를 FAISS에서 직접 꺼내기
 def get_doc_vector_from_faiss(doc):
     # doc도 문자열이므로 그대로 해시값 계산
@@ -80,9 +83,10 @@ def get_doc_vector_from_faiss(doc):
     vec = np.asarray(vec, dtype="float32")  # 넘파이 배열로 변환
     return vec / (np.linalg.norm(vec) + 1e-12)  # L2 정규화해서 반환
 
+
 # MultiQuery retriever(사용자 질문과 유사한 질문 생성)
 retriever = MultiQueryRetriever.from_llm(
-    retriever=vectorstore.as_retriever(search_kwargs={"k": 3}),
+    retriever=vectorstore.as_retriever(search_kwargs={"k": 2}),
     llm=llm)
 
 # -----------------------------------------------------------------------------
@@ -111,9 +115,11 @@ TOP1_MARGIN = 0.03
 # 임베딩 캐시 (전역)
 EMB_CACHE = {}  # key: 문서 고유ID(또는 내용 해시), value: L2 정규화된 np.array 벡터
 
+
 def parse_inline_source(text: str) -> str:
     m = re.search(r"<\s*출처[:：]\s*([^>]+)>", text)
     return m.group(1).strip() if m else ""
+
 
 def should_attach_citation(scores, answer_text) -> bool:
     if not scores:
@@ -132,26 +138,25 @@ def should_attach_citation(scores, answer_text) -> bool:
         stdv = 0.0
     if stdv < POST_HOC_MIN_STD:
         return False
-    #다 통과하면 출처를 붙임
+    # 다 통과하면 출처를 붙임
     return True
 
-#답변 생성 요청
+
+# 답변 생성 요청
 @app.post("/query")
 async def handle_query(request: QueryRequest):
     query = request.query
-    print("\n[DEBUG] 들어온 사용자 질문:", query)  # 프론트에서 받은 질문 출력
 
     # 문서 검색 (retriever)
     relevant_docs = retriever.invoke(query)
-    print(f"[DEBUG] 검색된 문단 개수: {len(relevant_docs)}")  # 몇 개 문단이 검색됐는지
-    
+
     # relevant_docs의 각각에 포함된 <출처: ...> 제거
     retrieved_docs = []
     for doc in relevant_docs:
         text = doc.page_content
         text_clean = re.sub(r"<\s*출처[:：][^>]+>", "", text).strip()
         retrieved_docs.append(text_clean)
-    retrieved = "\n\n".join(retrieved_docs) #문단들을 합쳐서 gpt에게 보냄
+    retrieved = "\n\n".join(retrieved_docs)  # 문단들을 합쳐서 gpt에게 보냄
 
     # 프롬프트
     prompt = f"""
@@ -176,7 +181,8 @@ async def handle_query(request: QueryRequest):
     
     chat_response = client.chat.completions.create(
         model="gpt-4o",
-        messages=[{"role": "system", "content": "너는 성신여자대학교의 입시 안내를 도와주는 챗봇 '수룡이'야. 수험생에게 친절하게 정확한 정보를 제공하는 것이 너의 역할이야. 모든 대답은 수룡의 정체성(성신여대 도우미, 친절하고 똑똑한 용 캐릭터)을 유지한 말투로 작성해줘."},
+        messages=[{"role": "system",
+                   "content": "너는 성신여자대학교의 입시 안내를 도와주는 챗봇 '수룡이'야. 수험생에게 친절하게 정확한 정보를 제공하는 것이 너의 역할이야. 모든 대답은 수룡의 정체성(성신여대 도우미, 친절하고 똑똑한 용 캐릭터)을 유지한 말투로 작성해줘."},
                   {"role": "user", "content": prompt}],
         temperature=0.4,
         top_p=0.95,
@@ -189,38 +195,36 @@ async def handle_query(request: QueryRequest):
     # gpt가 임의로 삽입했을 수 있는 <출처: ...>  제거
     answer = re.sub(r"<\s*출처[:：][^>]+>", "", answer).strip()
 
-
-
     # '현재 검색된 문서'와 'gpt 답변','질문' 임베딩을 비교하여 코사인 유사도가 충분히 높은 문단만 출처를 붙인다.
     try:
         cand_docs = relevant_docs  # 현재 검색된 문단만 비교 대상으로 사용
         if not cand_docs:
             raise RuntimeError("No candidate docs for post-hoc matching")
 
-
         # 답변 <-> 문단
         # 답변 임베딩 + L2 정규화(벡터의 길이를 1로)
         answer_vec = embedding_model.embed_query(answer)
         a_vec = np.array(answer_vec, dtype="float32")
         a_vec /= (np.linalg.norm(a_vec) + 1e-12)
+
         # 문단 벡터 가져오기 + L2 정규화
         def _doc_key(d):
-            return hash(d.page_content)
+            return hash(d)
+
         cand_embs = []
         for d in cand_docs:
-            v = get_doc_vector_from_faiss(d) #FAISS 인덱스에 저장돼 있는 벡터 꺼내기
-            if v is None: #못가져온 경우, EMB_CACHE에 있는지 확인
+            v = get_doc_vector_from_faiss(d)  # FAISS 인덱스에 저장돼 있는 벡터 꺼내기
+            if v is None:  # 못가져온 경우, EMB_CACHE에 있는지 확인
                 k = _doc_key(d)
                 v = EMB_CACHE.get(k)
-                if v is None: #없으면 새로 임베딩, 캐시에 저장
+                if v is None:  # 없으면 새로 임베딩, 캐시에 저장
                     v_list = embedding_model.embed_documents([d.page_content])[0]
                     v = np.array(v_list, dtype="float32")
                     v /= (np.linalg.norm(v) + 1e-12)
                     EMB_CACHE[k] = v
-            cand_embs.append(v) #벡터를 cand_embs에 추가
+            cand_embs.append(v)  # 벡터를 cand_embs에 추가
         # 코사인 유사도: 답변 <-> 문단
         scores_ans_doc = [float(np.dot(a_vec, v)) for v in cand_embs]
-
 
         # 질문 <-> 문단
         # 질문 임베딩 + 정규화
@@ -230,16 +234,15 @@ async def handle_query(request: QueryRequest):
         # 코사인 유사도: 질문 <-> 문단
         scores_q_doc = [float(np.dot(q_vec, v)) for v in cand_embs]
 
-
         # 상위 TOP_K 문단 선택
         ranked = sorted(
             zip(cand_docs, scores_ans_doc, scores_q_doc),
             key=lambda x: x[1],
             reverse=True
         )
-        posthoc = ranked[:POST_HOC_TOP_K] #상위 K만큼 잘라서 posthoc에 저장
-        topk_ans = [s_ad for _, s_ad, _ in posthoc] #두 번째 값(s_ad)(답변 <-> 문단 유사도 점수)만 추출
-        topk_q   = [s_qd for _, _, s_qd in posthoc] #세 번째 값(s_qd)(질문 <-> 문단 유사도 점수)만 추출
+        posthoc = ranked[:POST_HOC_TOP_K]  # 상위 K만큼 잘라서 posthoc에 저장
+        topk_ans = [s_ad for _, s_ad, _ in posthoc]  # 두 번째 값(s_ad)(답변 <-> 문단 유사도 점수)만 추출
+        topk_q = [s_qd for _, _, s_qd in posthoc]  # 세 번째 값(s_qd)(질문 <-> 문단 유사도 점수)만 추출
 
         # 답변 <-> 문단 유사도 점수들의 표준편차 계산 (클수록 후보 확실)
         try:
@@ -253,11 +256,19 @@ async def handle_query(request: QueryRequest):
         margin_ok = (top1 - top2) >= TOP1_MARGIN
 
         # 질문 <-> 문단, 답변 <-> 문단의 최고 유사도가 최소 기준 이상인지 확인
-        qdoc_ok = (max(topk_q)   if topk_q   else 0.0) >= QDOC_MIN
+        qdoc_ok = (max(topk_q) if topk_q else 0.0) >= QDOC_MIN
         adoc_ok = (max(topk_ans) if topk_ans else 0.0) >= ADOC_MIN
 
         # 기존 기준 (답변 길이, 최고점, 분산) 만족하는지
         attach_basic = should_attach_citation(topk_ans, answer)
+        
+        print("[DEBUG] attach check:", {
+            "answer_len": len(answer.strip()),
+            "qdoc_ok": qdoc_ok,
+            "adoc_ok": adoc_ok,
+            "attach_basic": attach_basic,
+            "margin_ok": margin_ok
+        })
 
         # 최종 부착 여부 결정
         attach = (
@@ -277,13 +288,13 @@ async def handle_query(request: QueryRequest):
 
     except Exception:
         # 사후 매칭 도중 오류가 발생하면 출처 부착을 건너뜁니다.
-        answer += ""
+        answer += "오류낫슴여"
 
     # 최종 답변 반환
     return {"answer": answer}
 
 
-#사용자가 입력한 질문과 유사한 추천 질문 선정, 프론트에 보내기
+# 사용자가 입력한 질문과 유사한 추천 질문 선정, 프론트에 보내기
 @app.post("/suggest")
 async def recommend_questions_endpoint(request: QueryRequest):
     query = request.query
@@ -292,7 +303,7 @@ async def recommend_questions_endpoint(request: QueryRequest):
         input=query,
         model="text-embedding-3-small"
     )
-    #사용자 질문 임베딩
+    # 사용자 질문 임베딩
     query_embedding = np.array(embedding_response.data[0].embedding)
     query_embedding = query_embedding / np.linalg.norm(query_embedding)
 
@@ -310,31 +321,35 @@ async def recommend_questions_endpoint(request: QueryRequest):
     similar_questions = [recommend_questions[idx] for (s, idx) in filtered]
     return {"results": similar_questions}
 
-#메인 화면
+
+# 메인 화면
 @app.get("/", response_class=HTMLResponse)
 async def serve_index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
-#채팅 화면
+
+# 채팅 화면
 @app.get("/chat", response_class=HTMLResponse)
 async def serve_chat(request: Request):
     return templates.TemplateResponse("chat.html", {"request": request})
+
 
 # 정시 FAQ 페이지
 @app.get("/jungsi_faq", response_class=HTMLResponse)
 async def serve_jungsi_faq(request: Request):
     return templates.TemplateResponse("jungsi_faq.html", {"request": request})
-    
+
+
 # 공통 FAQ 페이지
 @app.get("/common-faq", response_class=HTMLResponse)
 async def serve_common_faq(request: Request):
     return templates.TemplateResponse("common_faq.html", {"request": request})
 
+
 # 수시 FAQ 페이지
 @app.get("/susi-faq", response_class=HTMLResponse)
 async def serve_susi_faq(request: Request):
     return templates.TemplateResponse("susi_faq.html", {"request": request})
-
 
 
 
