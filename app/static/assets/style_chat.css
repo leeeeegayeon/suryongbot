@@ -108,6 +108,7 @@ body.chat-body-bg {
   color: #6C69AD;
   line-height: 1.6;
   outline: none;
+  background-color: transparent; 
 }
 
 .send-btn {
