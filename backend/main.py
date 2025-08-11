@@ -8,16 +8,15 @@ from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 import os
 import re
+import numpy as np  
+import statistics  
 
-# LangChain 관련 추가
 from langchain_community.vectorstores import FAISS as LangChainFAISS
 from langchain_openai import OpenAIEmbeddings
 from langchain.retrievers.multi_query import MultiQueryRetriever
 from langchain_community.chat_models import ChatOpenAI
 from langchain_community.document_transformers import LongContextReorder
 
-
-# OpenAI 임베딩만 별도로 쓸 거면 client 유지
 from openai import OpenAI
 
 app = FastAPI()
@@ -71,6 +70,36 @@ retriever_multi = MultiQueryRetriever.from_llm(
 # 의미 + 키워드 기반 앙상블 리트리버
 retriever = retriever_multi
 
+# 출처 표기 기준
+POST_HOC_TOP_K = 3
+POST_HOC_MIN_SCORE = 0.28
+POST_HOC_MIN_STD = 0.035
+POST_HOC_MIN_ANSWER_LEN = 20
+
+EMB_CACHE = {}  # key: 문서 고유ID(또는 내용 해시), val: 정규화 임베딩 np.array
+
+def _parse_inline_source(text: str) -> str:
+    """본문에 붙은 <출처: ...>만 추출. 없으면 빈 문자열."""
+    m = re.search(r"<\s*출처[:：]\s*([^>]+)>", text)
+    return m.group(1).strip() if m else ""
+
+def _should_attach_citation(scores, answer_text) -> bool:
+    if not scores:
+        return False
+    if len(answer_text.strip()) < POST_HOC_MIN_ANSWER_LEN:
+        return False
+    top_score = max(scores)
+    if top_score < POST_HOC_MIN_SCORE:
+        return False
+    try:
+        stdv = statistics.pstdev(scores)
+    except statistics.StatisticsError:
+        stdv = 0.0
+    if stdv < POST_HOC_MIN_STD:
+        return False
+    return True
+
+
 @app.post("/query")
 async def handle_query(request: QueryRequest):
     query = request.query
@@ -82,17 +111,12 @@ async def handle_query(request: QueryRequest):
     reordering = LongContextReorder()
     reordered_docs = reordering.transform_documents(relevant_docs)
 
-    # 3. 출처 정보 추출
+    # 3. 출처 정보 추출 + 모델 입력용 텍스트에서 <출처: ...> 제거
     retrieved_docs = []
-    source_pages = []
-
     for doc in reordered_docs:
         text = doc.page_content
-        match = re.search(r"<출처:\s*(.*?)>", text)
-        source = match.group(1).strip() if match else "출처 미상"
-        text_clean = re.sub(r"<출처:.*?>", "", text).strip()
+        text_clean = re.sub(r"<\s*출처[:：][^>]+>", "", text).strip()
         retrieved_docs.append(text_clean)
-        source_pages.append(source)
 
     retrieved = "\n\n".join(retrieved_docs)
 
@@ -106,7 +130,7 @@ async def handle_query(request: QueryRequest):
 
                 다음 기준에 따라 답변을 한국어로 작성해줘.
 
-                1. 사용자 질문에 대한 답을 찾을 수 없다면, "자세한 사항은 성신여자대학교 입학처 홈페이지의 입시요강을 참고하거나, 입학처(02-920-2000)에 문의해 주세요."라는 문장을 포함시켜.
+                1. 사용자 질문에 대한 답을 찾을 수 없는 경우에는, "자세한 사항은 성신여자대학교 입학처 홈페이지의 입시요강을 참고하거나, 입학처(02-920-2000)에 문의해 주세요."라는 문장을 포함시켜.
                 2. 입시 관련 질문이 아니라면(예: 점심 메뉴 추천, 잡담 등), **가볍고 친근하게 스몰토크**로 답해줘.
                 3. 인삿말은 매번 하지 않아도 돼.
                 4. 의도를 알 수 없는 질문이나 키워드만 있을 경우에는 이렇게 답변해줘: "죄송해요, 질문이 조금 불분명해요. 구체적으로 알려주시면 더 정확하게 안내해드릴 수 있어요! 😊"
@@ -127,7 +151,76 @@ async def handle_query(request: QueryRequest):
         frequency_penalty=0.3
     )
 
-    return {"answer": chat_response.choices[0].message.content}
+    answer = chat_response.choices[0].message.content
+
+    # 모델이 임의로 붙였을 수도 있는 본문 각주 형태 제거
+    answer = re.sub(r"<\s*출처[:：][^>]+>", "", answer).strip()
+
+   # 출처 표기기
+    try:
+        cand_docs = reordered_docs
+        if not cand_docs:
+            raise RuntimeError("No candidate docs for post-hoc matching")
+
+        # 답변 임베딩 + 정규화
+        answer_vec = embedding_model.embed_query(answer)
+        q = np.array(answer_vec, dtype="float32")
+        q /= (np.linalg.norm(q) + 1e-12)
+
+        # 문서 임베딩 + 정규화 (캐시 활용)
+        def _doc_key(d):
+            return d.metadata.get("id") or hash(d.page_content)
+
+        cand_embs = []
+        for d in cand_docs:
+            k = _doc_key(d)
+            v = EMB_CACHE.get(k)
+            if v is None:
+                v_list = embedding_model.embed_documents([d.page_content])[0]
+                v = np.array(v_list, dtype="float32")
+                v /= (np.linalg.norm(v) + 1e-12)
+                EMB_CACHE[k] = v
+            cand_embs.append(v)
+
+        # 코사인 유사도
+        scores = [float(np.dot(q, v)) for v in cand_embs]
+
+        # 상위 TOP_K 선별
+        ranked = sorted(zip(cand_docs, scores), key=lambda x: x[1], reverse=True)
+        posthoc_docs = ranked[:POST_HOC_TOP_K]
+        topk_scores = [s for _, s in posthoc_docs]
+
+        # 출처 부착 여부 판정
+        if _should_attach_citation(topk_scores, answer):
+            # 1) 한 줄 출처 문장 — 본문 <출처: ...>만 사용
+            citation_sentence = ""
+            for d, s in posthoc_docs:
+                inline = _parse_inline_source(d.page_content)
+                if inline:
+                    citation_sentence = f"(본 내용은 입시요강 {inline}를 참고하여 작성되었습니다.)"
+                    break
+            if citation_sentence:
+                answer = answer.rstrip() + " " + citation_sentence
+
+            # 2) 하단 참고 출처 블럭 (상위 k)
+            citations = []
+            for rank, (d, s) in enumerate(posthoc_docs, start=1):
+                inline = _parse_inline_source(d.page_content)
+                if not inline:
+                    continue
+                snippet = (d.page_content.strip().splitlines() or [""])[0]
+                snippet = re.sub(r"<\s*출처[:：][^>]+>", "", snippet).strip()
+                if len(snippet) > 80:
+                    snippet = snippet[:80] + "..."
+                citations.append(f"{rank}. 출처: {inline} | score={s:.3f} | {snippet}")
+            if citations:
+                answer += "\n\n—\n📌 참고 출처(사후 매칭 · 코사인):\n" + "\n".join(f"- {c}" for c in citations)
+
+    except Exception:
+        answer += "\n\n(참고: 사후 매칭 중 오류가 발생하여 출처 자동 첨부를 건너뛰었습니다.)"
+
+    return {"answer": answer}
+
 
 @app.post("/suggest")
 async def recommend_questions_endpoint(request: QueryRequest):
@@ -140,31 +233,26 @@ async def recommend_questions_endpoint(request: QueryRequest):
     query_embedding = np.array(embedding_response.data[0].embedding)
     query_embedding = query_embedding / np.linalg.norm(query_embedding)
 
-    top_k = 3
+    top_k = 10  
     scores, indices = recommend_index.search(np.array([query_embedding]), top_k)
-    similar_questions = [recommend_questions[idx] for idx in indices[0]]
 
+    THRESH = 0.35
+    # 상위 3개만 반환
+    pairs = [(float(scores[0][i]), int(indices[0][i])) for i in range(len(indices[0]))]
+    filtered = [(s, idx) for (s, idx) in pairs if s >= THRESH]
+    # 필요하면 점수 내림차순 정렬
+    filtered.sort(key=lambda x: x[0], reverse=True)
+    filtered = filtered[:3]
+
+    similar_questions = [recommend_questions[idx] for (_, idx) in filtered]
     return {"results": similar_questions}
+
 
 @app.get("/", response_class=HTMLResponse)
 async def serve_index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
+
 @app.get("/chat", response_class=HTMLResponse)
 async def serve_chat(request: Request):
     return templates.TemplateResponse("chat.html", {"request": request})
-    
-@app.get("/faq", response_class=HTMLResponse)
-async def serve_faq(request: Request):
-    return templates.TemplateResponse("common_faq.html", {"request": request})
-
-@app.get("/susi_faq", response_class=HTMLResponse)
-async def serve_susi_faq(request: Request):
-    return templates.TemplateResponse("susi_faq.html", {"request": request})
-
-@app.get("/jungsi_faq", response_class=HTMLResponse)
-async def serve_jungsi_faq(request: Request):
-    return templates.TemplateResponse("jungsi_faq.html", {"request": request})
-
-
-
