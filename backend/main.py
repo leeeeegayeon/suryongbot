@@ -10,14 +10,12 @@ import os
 import re
 import numpy as np
 import statistics
-
+from openai import OpenAI
 # LangChain
 from langchain_community.vectorstores import FAISS as LangChainFAISS
 from langchain_openai import OpenAIEmbeddings
 from langchain.retrievers.multi_query import MultiQueryRetriever
 from langchain_community.chat_models import ChatOpenAI
-
-from openai import OpenAI
 
 app = FastAPI()
 
@@ -62,46 +60,45 @@ llm = ChatOpenAI(model="gpt-4o", temperature=0.4)
 
 # 어떤 문단(hash 값)이 FAISS 인덱스에서 몇 번째(row)에 저장돼 있는지 매핑
 DOCROW_BY_HASH = {}
-
 # 인덱스의 행 번호(i)와 해당 행의 문단 ID(doc_id)를 순회
 for i, doc_id in enumerate(vectorstore.index_to_docstore_id):
     doc = vectorstore.docstore.search(doc_id)
     if doc:
-        # page_content의 해시값을 key로, 행 번호(i)를 value로 저장
-        DOCROW_BY_HASH[hash(doc.page_content)] = i
+        # doc이 문자열이므로 그대로 해시값 계산
+        DOCROW_BY_HASH[hash(doc)] = i
 
 # 특정 문단(doc)의 임베딩 벡터를 FAISS에서 직접 꺼내기
 def get_doc_vector_from_faiss(doc):
-    row = DOCROW_BY_HASH.get(hash(doc.page_content)) #행 번호를 찾아온다
+    # doc도 문자열이므로 그대로 해시값 계산
+    row = DOCROW_BY_HASH.get(hash(doc))
     if row is None:
         return None
     try:
         vec = vectorstore.index.reconstruct(row)
     except Exception:
         return None
-    vec = np.asarray(vec, dtype="float32") #넘파이 배열로 변환
-    return vec / (np.linalg.norm(vec) + 1e-12) # L2 정규화해서 반환
+    vec = np.asarray(vec, dtype="float32")  # 넘파이 배열로 변환
+    return vec / (np.linalg.norm(vec) + 1e-12)  # L2 정규화해서 반환
 
 # MultiQuery retriever(사용자 질문과 유사한 질문 생성)
 retriever = MultiQueryRetriever.from_llm(
     retriever=vectorstore.as_retriever(search_kwargs={"k": 3}),
     llm=llm)
 
-# --------------------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # 이 설정들은 답변을 생성한 뒤, 후보 문단들과 임베딩 유사도를 비교하여 출처를 붙일지 여부를 판단하는 데 사용됩니다.
 
 # POST_HOC_TOP_K        : 유사도 상위 몇 개 문단을 후보로 볼지 결정
 # POST_HOC_MIN_SCORE    : 후보 중 최대 코사인 유사도가 이 값보다 낮으면 출처를 붙이지 않음
 # POST_HOC_MIN_STD      : 상위 k개 점수의 표준편차가 이 값보다 작으면 랜덤 매칭으로 간주하고 출처를 붙이지 않음
-# POST_HOC_MIN_ANSWER_LEN : 답변 길이가 이 문자 수보다 짧으면 출처를 붙이지 않음
+# POST_HOC_MIN_ANSWER_LEN: 답변 길이가 이 문자 수보다 짧으면 출처를 붙이지 않음
 # QDOC_MIN/ADOC_MIN     : 질문↔문단 / 답변↔문단 최소 코사인 유사도 기준
 # TOP1_MARGIN           : 최고점과 두 번째 점수 차이가 이 값 이상이어야 함
 # EMB_CACHE             : 문서 임베딩 캐시. 문단을 임베딩할 때마다 API 호출을 줄이기 위해 사용
 # parse_inline_source   : 문단 본문에서 <출처: ...> 형태의 출처만 추출하는 함수
 # should_attach_citation: 출처를 붙일지 말지, 조건을 확인하는 함수
-# --------------------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
-# 출처 표기 기준
 POST_HOC_TOP_K = 4
 POST_HOC_MIN_SCORE = 0.28
 POST_HOC_MIN_STD = 0.035
@@ -152,9 +149,9 @@ async def handle_query(request: QueryRequest):
         text = doc.page_content
         text_clean = re.sub(r"<\s*출처[:：][^>]+>", "", text).strip()
         retrieved_docs.append(text_clean)
-    retrieved = "\n\n".join(retrieved_docs) #문단들을 합쳐서 GPT에게 보냄
+    retrieved = "\n\n".join(retrieved_docs) #문단들을 합쳐서 gpt에게 보냄
 
-    # GPT 프롬프트
+    # 프롬프트
     prompt = f"""
             [사용자 질문]  
             {query}
@@ -184,9 +181,9 @@ async def handle_query(request: QueryRequest):
         frequency_penalty=0.3
     )
 
-    # GPT 답변
+    # gpt 답변
     answer = chat_response.choices[0].message.content
-    # GPT가 임의로 삽입했을 수 있는 본문 각주 형태(<출처: ...>) 제거
+    # gpt가 임의로 삽입했을 수 있는 <출처: ...>  제거
     answer = re.sub(r"<\s*출처[:：][^>]+>", "", answer).strip()
 
 
@@ -318,5 +315,9 @@ async def serve_index(request: Request):
 #채팅 화면
 @app.get("/chat", response_class=HTMLResponse)
 async def serve_chat(request: Request):
-
     return templates.TemplateResponse("chat.html", {"request": request})
+
+#FAQ
+@app.get("/jungsi_faq", response_class=HTMLResponse)
+async def serve_jungsi_faq(request: Request):
+    return templates.TemplateResponse("jungsi_faq.html", {"request": request})
