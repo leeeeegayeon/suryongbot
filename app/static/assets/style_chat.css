@@ -147,7 +147,7 @@ body.chat-body-bg {
   flex-wrap: wrap;
   gap: 10px;
   padding: 12px 20px 4px;
-  background-color: white;
+  background-color: transparent;
   margin-bottom: 100px;
 }
 
