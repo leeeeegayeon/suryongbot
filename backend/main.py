@@ -139,10 +139,12 @@ def should_attach_citation(scores, answer_text) -> bool:
 @app.post("/query")
 async def handle_query(request: QueryRequest):
     query = request.query
+    print("\n[DEBUG] 들어온 사용자 질문:", query)  # 프론트에서 받은 질문 출력
 
     # 문서 검색 (retriever)
     relevant_docs = retriever.invoke(query)
-
+    print(f"[DEBUG] 검색된 문단 개수: {len(relevant_docs)}")  # 몇 개 문단이 검색됐는지
+    
     # relevant_docs의 각각에 포함된 <출처: ...> 제거
     retrieved_docs = []
     for doc in relevant_docs:
@@ -170,7 +172,8 @@ async def handle_query(request: QueryRequest):
                 학생부 교과 전형으로는 간호대학(자연), 사범대학 외의 학과를 제외하고 모집하지 않아.
             7. 모집단위를 언급하지 않고 특성화고교출신자 기준학과에 대한 질문을 하면 , 명시해서 다시 물어보라고 안내해줘.
                 """
-
+    print("\n[DEBUG] GPT에 보낼 최종 프롬프트:\n", prompt)  # 프롬프트 전체 출력
+    
     chat_response = client.chat.completions.create(
         model="gpt-4o",
         messages=[{"role": "system", "content": "너는 성신여자대학교의 입시 안내를 도와주는 챗봇 '수룡이'야. 수험생에게 친절하게 정확한 정보를 제공하는 것이 너의 역할이야. 모든 대답은 수룡의 정체성(성신여대 도우미, 친절하고 똑똑한 용 캐릭터)을 유지한 말투로 작성해줘."},
@@ -331,6 +334,7 @@ async def serve_common_faq(request: Request):
 @app.get("/susi-faq", response_class=HTMLResponse)
 async def serve_susi_faq(request: Request):
     return templates.TemplateResponse("susi_faq.html", {"request": request})
+
 
 
 
