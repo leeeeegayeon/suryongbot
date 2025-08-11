@@ -87,7 +87,7 @@ retriever = MultiQueryRetriever.from_llm(
     retriever=vectorstore.as_retriever(search_kwargs={"k": 3}),
     llm=llm)
 
-# -------------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------------------
 # 이 설정들은 답변을 생성한 뒤, 후보 문단들과 임베딩 유사도를 비교하여 출처를 붙일지 여부를 판단하는 데 사용됩니다.
 
 # POST_HOC_TOP_K        : 유사도 상위 몇 개 문단을 후보로 볼지 결정
@@ -99,7 +99,7 @@ retriever = MultiQueryRetriever.from_llm(
 # EMB_CACHE             : 문서 임베딩 캐시. 문단을 임베딩할 때마다 API 호출을 줄이기 위해 사용
 # parse_inline_source   : 문단 본문에서 <출처: ...> 형태의 출처만 추출하는 함수
 # should_attach_citation: 출처를 붙일지 말지, 조건을 확인하는 함수
-# --------------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------------------
 
 # 출처 표기 기준
 POST_HOC_TOP_K = 4
@@ -318,4 +318,5 @@ async def serve_index(request: Request):
 #채팅 화면
 @app.get("/chat", response_class=HTMLResponse)
 async def serve_chat(request: Request):
+
     return templates.TemplateResponse("chat.html", {"request": request})
