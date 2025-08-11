@@ -8,14 +8,14 @@ from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 import os
 import re
-import numpy as np  
-import statistics  
+import numpy as np
+import statistics
 
+# LangChain 관련 추가
 from langchain_community.vectorstores import FAISS as LangChainFAISS
 from langchain_openai import OpenAIEmbeddings
 from langchain.retrievers.multi_query import MultiQueryRetriever
 from langchain_community.chat_models import ChatOpenAI
-from langchain_community.document_transformers import LongContextReorder
 
 from openai import OpenAI
 
@@ -104,23 +104,19 @@ def _should_attach_citation(scores, answer_text) -> bool:
 async def handle_query(request: QueryRequest):
     query = request.query
 
-    # 1. 문서 검색 (앙상블 리트리버)
+    # 문서 검색
     relevant_docs = retriever.invoke(query)
 
-    # 2. LongContextReorder로 순서 재정렬
-    reordering = LongContextReorder()
-    reordered_docs = reordering.transform_documents(relevant_docs)
-
-    # 3. 출처 정보 추출 + 모델 입력용 텍스트에서 <출처: ...> 제거
+    # 출처 정보 추출 + 모델 입력용 텍스트에서 <출처: ...> 제거
     retrieved_docs = []
-    for doc in reordered_docs:
+    for doc in relevant_docs:
         text = doc.page_content
         text_clean = re.sub(r"<\s*출처[:：][^>]+>", "", text).strip()
         retrieved_docs.append(text_clean)
 
     retrieved = "\n\n".join(retrieved_docs)
 
-    # 4. GPT 프롬프트 구성
+    # GPT 프롬프트 구성
     prompt = f"""
                 [사용자 질문]  
                 {query}
@@ -135,8 +131,7 @@ async def handle_query(request: QueryRequest):
                 3. 인삿말은 매번 하지 않아도 돼.
                 4. 의도를 알 수 없는 질문이나 키워드만 있을 경우에는 이렇게 답변해줘: "죄송해요, 질문이 조금 불분명해요. 구체적으로 알려주시면 더 정확하게 안내해드릴 수 있어요! 😊"
                 5. 학과명이나 전형명을 언급하지 않고 모집 인원에 대한 질문을 하면, 명시해서 다시 물어봐달라고 해줘.
-                6. 문단마다 적혀있는 출처 정보를 포함해서 답해줘.
-                7. 학생부 교과 전형의 모집인원에 관한 질문이라면 다음을 참고 해서 답해줘:
+                6. 학생부 교과 전형의 모집인원에 관한 질문이라면 다음을 참고 해서 답해줘:
                     학생부 교과 전형으로는 간호대학(자연), 사범대학 외의 학과를 제외하고 모집하지 않아.
                 """
 
@@ -156,9 +151,9 @@ async def handle_query(request: QueryRequest):
     # 모델이 임의로 붙였을 수도 있는 본문 각주 형태 제거
     answer = re.sub(r"<\s*출처[:：][^>]+>", "", answer).strip()
 
-   # 출처 표기기
+    # 답변 - 문단 유사도 비교
     try:
-        cand_docs = reordered_docs
+        cand_docs = relevant_docs
         if not cand_docs:
             raise RuntimeError("No candidate docs for post-hoc matching")
 
@@ -214,7 +209,7 @@ async def handle_query(request: QueryRequest):
                     snippet = snippet[:80] + "..."
                 citations.append(f"{rank}. 출처: {inline} | score={s:.3f} | {snippet}")
             if citations:
-                answer += "\n\n—\n📌 참고 출처(사후 매칭 · 코사인):\n" + "\n".join(f"- {c}" for c in citations)
+                answer += "\n\n—\n 참고 출처(사후 매칭 · 코사인):\n" + "\n".join(f"- {c}" for c in citations)
 
     except Exception:
         answer += "\n\n(참고: 사후 매칭 중 오류가 발생하여 출처 자동 첨부를 건너뛰었습니다.)"
@@ -233,8 +228,9 @@ async def recommend_questions_endpoint(request: QueryRequest):
     query_embedding = np.array(embedding_response.data[0].embedding)
     query_embedding = query_embedding / np.linalg.norm(query_embedding)
 
-    top_k = 10  
-    scores, indices = recommend_index.search(np.array([query_embedding]), top_k)
+    top_k = 10
+    scores, indices = recommend_index.search(
+        np.array([query_embedding], dtype=np.float32), top_k )
 
     THRESH = 0.35
     # 상위 3개만 반환
