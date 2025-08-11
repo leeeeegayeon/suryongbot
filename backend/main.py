@@ -71,7 +71,7 @@ retriever_multi = MultiQueryRetriever.from_llm(
 retriever = retriever_multi
 
 # 출처 표기 기준
-POST_HOC_TOP_K = 3
+POST_HOC_TOP_K = 5
 POST_HOC_MIN_SCORE = 0.28
 POST_HOC_MIN_STD = 0.035
 POST_HOC_MIN_ANSWER_LEN = 20
