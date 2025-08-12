@@ -132,34 +132,40 @@ async function fetchSuggestions() {
 
 function updateSuggestedTags(questions) { 
   const container = document.getElementById("recommendQuestions");
+  const chatBody = document.getElementById("chatBody");
   container.innerHTML = "";
 
   const safeList = Array.isArray(questions) ? questions : [];
 
-  // ✅ 목록 없으면 숨기고 종료
+  // 목록이 없으면 숨기고 여백 복구
   if (safeList.length === 0) {
     container.style.display = "none";
+    chatBody.classList.remove("with-suggestions");
     return;
   }
-  // ✅ 목록이 있으면 보여주기
+
+  // 목록이 있으면 보여주고 여백 늘리기
   container.style.display = "flex";
+  chatBody.classList.add("with-suggestions");
 
   safeList.forEach(q => {
     const tag = document.createElement("div");
     tag.className = "recommend-question-tag";
-    tag.textContent = `#${q}`; 
-    tag.onclick = () => { 
-      input.value = q; 
+    tag.textContent = `#${q}`;
+    tag.onclick = () => {
+      input.value = q;
       input.focus();
-      sendMessage(); 
+      sendMessage();
 
-      // ✅ 클릭 후 추천영역 숨기기
+      // 클릭 후 추천영역 숨기고 여백 복구
       container.innerHTML = "";
       container.style.display = "none";
+      chatBody.classList.remove("with-suggestions");
     };
-    container.appendChild(tag); 
+    container.appendChild(tag);
   });
 }
+
 
 
 function goToMain() {
