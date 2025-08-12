@@ -149,7 +149,8 @@ body.chat-body-bg {
   padding: 2px 20px 2px; 
   background-color: transparent;
   position: fixed;
-  bottom: 60px; /* 입력창 높이만큼 띄우기 */
+  bottom: 110px; /* 입력창 높이만큼 띄우기 */
+  z-index: 101; 
   left: 0;
   right: 0;
 
