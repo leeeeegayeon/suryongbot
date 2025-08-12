@@ -148,7 +148,13 @@ body.chat-body-bg {
   gap: 10px;
   padding: 2px 20px 2px; 
   background-color: transparent;
-  margin-bottom: 100px;
+  position: fixed;
+  bottom: 60px; /* 입력창 높이만큼 띄우기 */
+  left: 0;
+  right: 0;
+
+  /* 겹치지 않도록 여백 */
+  margin-bottom: 0;
 }
 
 
