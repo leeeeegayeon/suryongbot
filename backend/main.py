@@ -46,12 +46,10 @@ recommend_questions = load_paragraphs("question_candidates.txt")
 recommend_embeddings = load_embeddings("recommend_embeddings.npy")
 recommend_index = load_faiss_index("recommend_index.faiss")
 
-
 class QueryRequest(BaseModel):
     query: str
 
-
-# LangChain용 FAISS + retriever 설정
+# LangChain용 FAISS
 embedding_model = OpenAIEmbeddings(model="text-embedding-3-small", openai_api_key=os.getenv("OPENAI_API_KEY"))
 vectorstore = LangChainFAISS.load_local(
     "index_openai",
@@ -66,13 +64,11 @@ DOCROW_BY_HASH = {}
 for i, doc_id in enumerate(vectorstore.index_to_docstore_id):
     doc = vectorstore.docstore.search(doc_id)
     if doc:
-        # doc이 문자열이므로 그대로 해시값 계산
         DOCROW_BY_HASH[hash(doc)] = i
 
 
 # 특정 문단(doc)의 임베딩 벡터를 FAISS에서 직접 꺼내기
 def get_doc_vector_from_faiss(doc):
-    # doc도 문자열이므로 그대로 해시값 계산
     row = DOCROW_BY_HASH.get(hash(doc))
     if row is None:
         return None
@@ -128,8 +124,7 @@ def should_attach_citation(scores, answer_text) -> bool:
     if len(answer_text.strip()) < POST_HOC_MIN_ANSWER_LEN:
         return False
     # 유사도가 POST_HOC_MIN_SCORE 보다 낮으면 출처를 붙이지 않음
-    top_score = max(scores)
-    if top_score < POST_HOC_MIN_SCORE:
+    if max(scores) < POST_HOC_MIN_SCORE:
         return False
     # 표준편차가 POST_HOC_MIN_STD보다 작으면 출처를 붙이지 않음
     try:
@@ -199,7 +194,7 @@ async def handle_query(request: QueryRequest):
     #try:
     cand_docs = relevant_docs  # 현재 검색된 문단만 비교 대상으로 사용
     if not cand_docs:
-        raise RuntimeError("No candidate docs for post-hoc matching")
+        return {"answer": answer}
 
     # 답변 <-> 문단
     # 답변 임베딩 + L2 정규화(벡터의 길이를 1로)
@@ -218,7 +213,7 @@ async def handle_query(request: QueryRequest):
             k = _doc_key(d)
             v = EMB_CACHE.get(k)
             if v is None:  # 없으면 새로 임베딩, 캐시에 저장
-                v_list = embedding_model.embed_documents([d.page_content])[0]
+                v_list = embedding_model.embed_documents([d])[0]
                 v = np.array(v_list, dtype="float32")
                 v /= (np.linalg.norm(v) + 1e-12)
                 EMB_CACHE[k] = v
@@ -249,6 +244,7 @@ async def handle_query(request: QueryRequest):
         stdv = statistics.pstdev(topk_ans) if len(topk_ans) > 1 else 0.0
     except statistics.StatisticsError:
         stdv = 0.0
+
     # 1, 2등 점수를 뽑음
     top1 = topk_ans[0] if topk_ans else 0.0
     top2 = topk_ans[1] if len(topk_ans) > 1 else 0.0
@@ -342,6 +338,3 @@ async def serve_common_faq(request: Request):
 @app.get("/susi-faq", response_class=HTMLResponse)
 async def serve_susi_faq(request: Request):
     return templates.TemplateResponse("susi_faq.html", {"request": request})
-
-
-
