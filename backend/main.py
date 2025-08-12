@@ -178,7 +178,7 @@ async def handle_query(request: QueryRequest):
             7. 모집단위를 언급하지 않고 특성화고교출신자 기준학과에 대한 질문을 하면 , 명시해서 다시 물어보라고 안내해줘.
                 """
     print("\n[DEBUG] GPT에 보낼 최종 프롬프트:\n", prompt)  # 프롬프트 전체 출력
-    
+
     chat_response = client.chat.completions.create(
         model="gpt-4o",
         messages=[{"role": "system",
@@ -196,99 +196,91 @@ async def handle_query(request: QueryRequest):
     answer = re.sub(r"<\s*출처[:：][^>]+>", "", answer).strip()
 
     # '현재 검색된 문서'와 'gpt 답변','질문' 임베딩을 비교하여 코사인 유사도가 충분히 높은 문단만 출처를 붙인다.
+    #try:
+    cand_docs = relevant_docs  # 현재 검색된 문단만 비교 대상으로 사용
+    if not cand_docs:
+        raise RuntimeError("No candidate docs for post-hoc matching")
+
+    # 답변 <-> 문단
+    # 답변 임베딩 + L2 정규화(벡터의 길이를 1로)
+    answer_vec = embedding_model.embed_query(answer)
+    a_vec = np.array(answer_vec, dtype="float32")
+    a_vec /= (np.linalg.norm(a_vec) + 1e-12)
+
+    # 문단 벡터 가져오기 + L2 정규화
+    def _doc_key(d):
+        return hash(d)
+
+    cand_embs = []
+    for d in cand_docs:
+        v = get_doc_vector_from_faiss(d)  # FAISS 인덱스에 저장돼 있는 벡터 꺼내기
+        if v is None:  # 못가져온 경우, EMB_CACHE에 있는지 확인
+            k = _doc_key(d)
+            v = EMB_CACHE.get(k)
+            if v is None:  # 없으면 새로 임베딩, 캐시에 저장
+                v_list = embedding_model.embed_documents([d.page_content])[0]
+                v = np.array(v_list, dtype="float32")
+                v /= (np.linalg.norm(v) + 1e-12)
+                EMB_CACHE[k] = v
+        cand_embs.append(v)  # 벡터를 cand_embs에 추가
+    # 코사인 유사도: 답변 <-> 문단
+    scores_ans_doc = [float(np.dot(a_vec, v)) for v in cand_embs]
+
+    # 질문 <-> 문단
+    # 질문 임베딩 + 정규화
+    query_vec = embedding_model.embed_query(query)
+    q_vec = np.array(query_vec, dtype="float32")
+    q_vec /= (np.linalg.norm(q_vec) + 1e-12)
+    # 코사인 유사도: 질문 <-> 문단
+    scores_q_doc = [float(np.dot(q_vec, v)) for v in cand_embs]
+
+    # 상위 TOP_K 문단 선택
+    ranked = sorted(
+        zip(cand_docs, scores_ans_doc, scores_q_doc),
+        key=lambda x: x[1],
+        reverse=True
+    )
+    posthoc = ranked[:POST_HOC_TOP_K]  # 상위 K만큼 잘라서 posthoc에 저장
+    topk_ans = [s_ad for _, s_ad, _ in posthoc]  # 두 번째 값(s_ad)(답변 <-> 문단 유사도 점수)만 추출
+    topk_q = [s_qd for _, _, s_qd in posthoc]  # 세 번째 값(s_qd)(질문 <-> 문단 유사도 점수)만 추출
+
+    # 답변 <-> 문단 유사도 점수들의 표준편차 계산 (클수록 후보 확실)
     try:
-        cand_docs = relevant_docs  # 현재 검색된 문단만 비교 대상으로 사용
-        if not cand_docs:
-            raise RuntimeError("No candidate docs for post-hoc matching")
+        stdv = statistics.pstdev(topk_ans) if len(topk_ans) > 1 else 0.0
+    except statistics.StatisticsError:
+        stdv = 0.0
+    # 1, 2등 점수를 뽑음
+    top1 = topk_ans[0] if topk_ans else 0.0
+    top2 = topk_ans[1] if len(topk_ans) > 1 else 0.0
+    # 둘의 차이가 TOP1_MARGIN보다 큰 지 (클수록 후보 확실)
+    margin_ok = (top1 - top2) >= TOP1_MARGIN
 
-        # 답변 <-> 문단
-        # 답변 임베딩 + L2 정규화(벡터의 길이를 1로)
-        answer_vec = embedding_model.embed_query(answer)
-        a_vec = np.array(answer_vec, dtype="float32")
-        a_vec /= (np.linalg.norm(a_vec) + 1e-12)
+    # 질문 <-> 문단, 답변 <-> 문단의 최고 유사도가 최소 기준 이상인지 확인
+    qdoc_ok = (max(topk_q) if topk_q else 0.0) >= QDOC_MIN
+    adoc_ok = (max(topk_ans) if topk_ans else 0.0) >= ADOC_MIN
 
-        # 문단 벡터 가져오기 + L2 정규화
-        def _doc_key(d):
-            return hash(d)
+    # 기존 기준 (답변 길이, 최고점, 분산) 만족하는지
+    attach_basic = should_attach_citation(topk_ans, answer)
 
-        cand_embs = []
-        for d in cand_docs:
-            v = get_doc_vector_from_faiss(d)  # FAISS 인덱스에 저장돼 있는 벡터 꺼내기
-            if v is None:  # 못가져온 경우, EMB_CACHE에 있는지 확인
-                k = _doc_key(d)
-                v = EMB_CACHE.get(k)
-                if v is None:  # 없으면 새로 임베딩, 캐시에 저장
-                    v_list = embedding_model.embed_documents([d.page_content])[0]
-                    v = np.array(v_list, dtype="float32")
-                    v /= (np.linalg.norm(v) + 1e-12)
-                    EMB_CACHE[k] = v
-            cand_embs.append(v)  # 벡터를 cand_embs에 추가
-        # 코사인 유사도: 답변 <-> 문단
-        scores_ans_doc = [float(np.dot(a_vec, v)) for v in cand_embs]
+    # 최종 부착 여부 결정
+    attach = (
+            len(answer.strip()) >= POST_HOC_MIN_ANSWER_LEN and
+             qdoc_ok and adoc_ok and
+            (attach_basic or margin_ok)
+    )
 
-        # 질문 <-> 문단
-        # 질문 임베딩 + 정규화
-        query_vec = embedding_model.embed_query(query)
-        q_vec = np.array(query_vec, dtype="float32")
-        q_vec /= (np.linalg.norm(q_vec) + 1e-12)
-        # 코사인 유사도: 질문 <-> 문단
-        scores_q_doc = [float(np.dot(q_vec, v)) for v in cand_embs]
-
-        # 상위 TOP_K 문단 선택
-        ranked = sorted(
-            zip(cand_docs, scores_ans_doc, scores_q_doc),
-            key=lambda x: x[1],
-            reverse=True
-        )
-        posthoc = ranked[:POST_HOC_TOP_K]  # 상위 K만큼 잘라서 posthoc에 저장
-        topk_ans = [s_ad for _, s_ad, _ in posthoc]  # 두 번째 값(s_ad)(답변 <-> 문단 유사도 점수)만 추출
-        topk_q = [s_qd for _, _, s_qd in posthoc]  # 세 번째 값(s_qd)(질문 <-> 문단 유사도 점수)만 추출
-
-        # 답변 <-> 문단 유사도 점수들의 표준편차 계산 (클수록 후보 확실)
-        try:
-            stdv = statistics.pstdev(topk_ans) if len(topk_ans) > 1 else 0.0
-        except statistics.StatisticsError:
-            stdv = 0.0
-        # 1, 2등 점수를 뽑음
-        top1 = topk_ans[0] if topk_ans else 0.0
-        top2 = topk_ans[1] if len(topk_ans) > 1 else 0.0
-        # 둘의 차이가 TOP1_MARGIN보다 큰 지 (클수록 후보 확실)
-        margin_ok = (top1 - top2) >= TOP1_MARGIN
-
-        # 질문 <-> 문단, 답변 <-> 문단의 최고 유사도가 최소 기준 이상인지 확인
-        qdoc_ok = (max(topk_q) if topk_q else 0.0) >= QDOC_MIN
-        adoc_ok = (max(topk_ans) if topk_ans else 0.0) >= ADOC_MIN
-
-        # 기존 기준 (답변 길이, 최고점, 분산) 만족하는지
-        attach_basic = should_attach_citation(topk_ans, answer)
-        
-        print("[DEBUG] attach check:", {
-            "answer_len": len(answer.strip()),
-            "qdoc_ok": qdoc_ok,
-            "adoc_ok": adoc_ok,
-            "attach_basic": attach_basic,
-            "margin_ok": margin_ok
-        })
-
-        # 최종 부착 여부 결정
-        attach = (
-                len(answer.strip()) >= POST_HOC_MIN_ANSWER_LEN and
-                qdoc_ok and adoc_ok and
-                (attach_basic or margin_ok)
-        )
-
-        if attach:
-            # 상위 K 중 첫 번째 문단에서 출처만 추출
-            top_doc, _, _ = posthoc[0]
-            inline = parse_inline_source(top_doc.page_content)
-            if inline:
-                citation_sentence = f"(본 내용은 2026 수시모집요강 {inline}를 참고하여 작성되었습니다.)"
-                answer = answer.rstrip() + " " + citation_sentence
+    if attach:
+        # 상위 K 중 첫 번째 문단에서 출처만 추출
+        top_doc, _, _ = posthoc[0]
+        inline = parse_inline_source(top_doc.page_content)
+        if inline:
+            citation_sentence = f"(본 내용은 2026 수시모집요강 {inline}를 참고하여 작성되었습니다.)"
+            answer = answer.rstrip() + " " + citation_sentence
 
 
-    except Exception:
+    #except Exception:
         # 사후 매칭 도중 오류가 발생하면 출처 부착을 건너뜁니다.
-        answer += "오류낫슴여"
+        #answer += "오류낫슴여"
 
     # 최종 답변 반환
     return {"answer": answer}
