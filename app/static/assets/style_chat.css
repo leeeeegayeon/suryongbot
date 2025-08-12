@@ -145,11 +145,10 @@ body.chat-body-bg {
 .recommend-questions {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;                /* 태그 간격만 남김 */
-  padding: 0 20px;         /* 상하 패딩 0으로 */
-  margin: 0;               /* 아래 여백 없애기 */
-  background: transparent; /* 배경 투명 유지 */
-  align-content: flex-start; /* 여러 줄일 때 위로 촘촘히 붙음 */
+  gap: 10px;
+  padding: 4px 20px 4px; /* ⬅ 위쪽 여백을 12px → 4px 로 줄임 */
+  background-color: transparent;
+  margin-bottom: 100px;
 }
 
 
