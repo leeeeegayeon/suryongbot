@@ -7,8 +7,9 @@ openai
 langchain
 langchain-core
 langchain-community
-langchain-openai
+langchain-openai>=0.1.0
 faiss-cpu
 python-dotenv  
 jinja2 
+
 
