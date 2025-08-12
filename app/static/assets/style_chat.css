@@ -165,7 +165,7 @@ body.chat-body-bg {
   border-radius: 20px;
   font-size: 14px;
   color: #6C69AD;
-  background: transparent;
+  background: white;
   white-space: nowrap;
   cursor: pointer;
 }
