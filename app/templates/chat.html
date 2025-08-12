@@ -133,7 +133,17 @@ async function fetchSuggestions() {
 function updateSuggestedTags(questions) { 
   const container = document.getElementById("recommendQuestions");
   container.innerHTML = "";
+
   const safeList = Array.isArray(questions) ? questions : [];
+
+  // ✅ 목록 없으면 숨기고 종료
+  if (safeList.length === 0) {
+    container.style.display = "none";
+    return;
+  }
+  // ✅ 목록이 있으면 보여주기
+  container.style.display = "flex";
+
   safeList.forEach(q => {
     const tag = document.createElement("div");
     tag.className = "recommend-question-tag";
@@ -142,10 +152,16 @@ function updateSuggestedTags(questions) {
       input.value = q; 
       input.focus();
       sendMessage(); 
+
+      // ✅ 클릭 후 추천영역 숨기기
+      container.innerHTML = "";
+      container.style.display = "none";
     };
     container.appendChild(tag); 
   });
 }
+
+
 function goToMain() {
   window.location.href = "/"; 
 }
