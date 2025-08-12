@@ -15,7 +15,7 @@ from openai import OpenAI
 from langchain_community.vectorstores import FAISS as LangChainFAISS
 from langchain_openai import OpenAIEmbeddings
 from langchain.retrievers.multi_query import MultiQueryRetriever
-from langchain_community.chat_models import ChatOpenAI
+from langchain_openai import ChatOpenAI
 from langchain_core.documents import Document
 
 app = FastAPI()
@@ -62,25 +62,41 @@ llm = ChatOpenAI(model="gpt-4o", temperature=0.4)
 # 어떤 문단(hash 값)이 FAISS 인덱스에서 몇 번째(row)에 저장돼 있는지 매핑
 DOCROW_BY_HASH = {}
 # 인덱스의 행 번호(i)와 해당 행의 문단 ID(doc_id)를 순회
-for i, doc_id in enumerate(vectorstore.index_to_docstore_id):
+for row, doc_id in vectorstore.index_to_docstore_id.items():
     doc = vectorstore.docstore.search(doc_id)
-    print(i, type(doc)) #나중에 지워
-    if doc:
-        # doc이 str이면 Document로 변환
-        if isinstance(doc, str):
-            doc = Document(page_content=doc)
-        DOCROW_BY_HASH[hash(doc.page_content)] = i
+    if not doc:
+        continue
+
+    # content 뽑기: Document / dict / str 모두 처리
+    if isinstance(doc, Document):
+        content = doc.page_content
+    elif isinstance(doc, dict) and "page_content" in doc:
+        content = doc["page_content"]
+    else:
+        content = str(doc)
+
+    DOCROW_BY_HASH[hash(content)] = int(row)
 
 
 # 특정 문단(doc)의 임베딩 벡터를 FAISS에서 직접 꺼내기
 def get_doc_vector_from_faiss(doc):
-    row = DOCROW_BY_HASH.get(hash(doc.page_content))
+
+    if isinstance(doc, Document):
+        content = doc.page_content
+    elif isinstance(doc, dict) and "page_content" in doc:
+        content = doc["page_content"]
+    else:
+        content = str(doc)
+
+    row = DOCROW_BY_HASH.get(hash(content))
     if row is None:
         return None
+
     try:
         vec = vectorstore.index.reconstruct(row)
     except Exception:
         return None
+
     vec = np.asarray(vec, dtype="float32")  # 넘파이 배열로 변환
     return vec / (np.linalg.norm(vec) + 1e-12)  # L2 정규화해서 반환
 
