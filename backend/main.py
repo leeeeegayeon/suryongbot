@@ -64,12 +64,12 @@ DOCROW_BY_HASH = {}
 for i, doc_id in enumerate(vectorstore.index_to_docstore_id):
     doc = vectorstore.docstore.search(doc_id)
     if doc:
-        DOCROW_BY_HASH[hash(doc)] = i
+        DOCROW_BY_HASH[hash(doc.page_content)] = i
 
 
 # 특정 문단(doc)의 임베딩 벡터를 FAISS에서 직접 꺼내기
 def get_doc_vector_from_faiss(doc):
-    row = DOCROW_BY_HASH.get(hash(doc))
+    row = DOCROW_BY_HASH.get(hash(doc.page_content))
     if row is None:
         return None
     try:
@@ -203,17 +203,14 @@ async def handle_query(request: QueryRequest):
     a_vec /= (np.linalg.norm(a_vec) + 1e-12)
 
     # 문단 벡터 가져오기 + L2 정규화
-    def _doc_key(d):
-        return hash(d)
-
     cand_embs = []
     for d in cand_docs:
         v = get_doc_vector_from_faiss(d)  # FAISS 인덱스에 저장돼 있는 벡터 꺼내기
         if v is None:  # 못가져온 경우, EMB_CACHE에 있는지 확인
-            k = _doc_key(d)
+            k = hash(d.page_content)
             v = EMB_CACHE.get(k)
             if v is None:  # 없으면 새로 임베딩, 캐시에 저장
-                v_list = embedding_model.embed_documents([d])[0]
+                v_list = embedding_model.embed_documents([d.page_content])[0]
                 v = np.array(v_list, dtype="float32")
                 v /= (np.linalg.norm(v) + 1e-12)
                 EMB_CACHE[k] = v
