@@ -108,7 +108,6 @@ body.chat-body-bg {
   color: #6C69AD;
   line-height: 1.6;
   outline: none;
-  background-color: transparent; 
 }
 
 .send-btn {
@@ -146,10 +145,11 @@ body.chat-body-bg {
 .recommend-questions {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  padding: 12px 20px 4px;
-  background-color: transparent;
-  margin-bottom: 100px;
+  gap: 8px;                /* 태그 간격만 남김 */
+  padding: 0 20px;         /* 상하 패딩 0으로 */
+  margin: 0;               /* 아래 여백 없애기 */
+  background: transparent; /* 배경 투명 유지 */
+  align-content: flex-start; /* 여러 줄일 때 위로 촘촘히 붙음 */
 }
 
 .recommend-question-tag {
@@ -158,10 +158,11 @@ body.chat-body-bg {
   border-radius: 20px;
   font-size: 14px;
   color: #6C69AD;
-  background-color:  transparent;
-  cursor: pointer;
+  background: transparent;
   white-space: nowrap;
+  cursor: pointer;
 }
+
 
 .go-home-btn {
   position: absolute;
