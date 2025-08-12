@@ -193,7 +193,6 @@ async def handle_query(request: QueryRequest):
                 학생부 교과 전형으로는 간호대학(자연), 사범대학 외의 학과를 제외하고 모집하지 않아.
             7. 모집단위를 언급하지 않고 특성화고교출신자 기준학과에 대한 질문을 하면 , 명시해서 다시 물어보라고 안내해줘.
                 """
-    print("\n[DEBUG] GPT에 보낼 최종 프롬프트:\n", prompt)  # 프롬프트 전체 출력
 
     chat_response = client.chat.completions.create(
         model="gpt-4o",
@@ -354,3 +353,4 @@ async def serve_common_faq(request: Request):
 @app.get("/susi-faq", response_class=HTMLResponse)
 async def serve_susi_faq(request: Request):
     return templates.TemplateResponse("susi_faq.html", {"request": request})
+
