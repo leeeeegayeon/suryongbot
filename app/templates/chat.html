@@ -68,22 +68,34 @@
         chatBody.scrollTop = chatBody.scrollHeight;
     
         try {
-          const res = await fetch("/query", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ query: text })
-          });
-    
-          const data = await res.json();
-    
-         
-          botBubble.textContent = data.answer || "답변을 가져오는 데 문제가 생겼어요.";
-          chatBody.scrollTop = chatBody.scrollHeight;
-    
-        } catch (error) {
-          botBubble.textContent = "⚠️ 서버와 연결할 수 없어요.";
-          chatBody.scrollTop = chatBody.scrollHeight;
-        }
+  const res = await fetch("/query", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ query: text })
+  });
+
+  console.log("[DEBUG] /query 응답 상태:", res.status, res.statusText);
+
+  const rawText = await res.text(); // 먼저 원본 텍스트 확인
+  console.log("[DEBUG] /query 원본 응답:", rawText);
+
+  let data;
+  try {
+    data = JSON.parse(rawText);
+  } catch (parseError) {
+    console.error("[DEBUG] JSON 파싱 실패:", parseError);
+    throw parseError; // 파싱 실패 시 catch로 넘어감
+  }
+
+  botBubble.textContent = data.answer || "답변을 가져오는 데 문제가 생겼어요.";
+  chatBody.scrollTop = chatBody.scrollHeight;
+
+} catch (error) {
+  console.error("[DEBUG] fetch 오류:", error);
+  botBubble.textContent = "⚠️ 서버와 연결할 수 없어요.";
+  chatBody.scrollTop = chatBody.scrollHeight;
+}
+
       }
       const textarea = document.getElementById('questionInput');
 
