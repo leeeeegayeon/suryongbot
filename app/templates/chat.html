@@ -38,6 +38,10 @@
         const input = document.getElementById("questionInput");
         const text = input.value.trim();
         if (!text) return;
+
+        const rec = document.getElementById("recommendQuestions");
+        rec.innerHTML = "";
+        rec.style.display = "none";
     
         const chatBody = document.getElementById("chatBody");
     
@@ -195,11 +199,11 @@ window.addEventListener("DOMContentLoaded", () => {
       "GPT-4.0 기반의 성신여자대학교 챗봇 “수룡이”입니다. 🐉\n" +
       "성신여대 2026학년도 수시모집에 대해 궁금하신 점이 있으신가요? \n" +
       "저는 질문이 구체적일수록 더 정확한 답변을 드릴수 있어요! 🐉\n\n" +
-      "🔮 단어가 아닌 문장 형태로 질문해주세요. (ex) “수시 모집 일정이 언제인가요?” )\n" +
-      "🔮 저는 성신여자대학교 2026학년도 수시모집요강을 기반으로 답변하고 있어요,\n" +
-      "🔮 성신포탈, 도서관,공식 홈페이지, 커뮤니티 등 다른 사이트의 정보는 알지 못해요.\n"+
+      "🔮 단어가 아닌 문장 형태로 질문해주세요. (ex. “수시 모집 일정이 언제인가요?” )\n" +
+      "🔮 저는 성신여자대학교 2026학년도 수시모집요강을 기반으로 답변하고 있어요.\n" +
+      "🔮 성신포탈, 도서관, 공식 홈페이지, 커뮤니티 등 다른 사이트의 정보는 알지 못해요.\n"+
       "🔮 제가 제공하는 정보는 항상 정확하지 않을 수 있어요. 정확한 정보는 안내된 출처를 직접 확인해주세요.\n" +
-      "🔮 저는 여러분의 개인정보를 수집하지 않아요. 안심하고 이용해주세요\n" ;
+      "🔮 저는 여러분의 개인정보를 수집하지 않아요. 안심하고 이용해주세요.\n" ;
 
     botContainer.appendChild(suryongImg);
     botContainer.appendChild(botBubble);
