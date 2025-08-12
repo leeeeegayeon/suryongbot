@@ -16,6 +16,7 @@ from langchain_community.vectorstores import FAISS as LangChainFAISS
 from langchain_openai import OpenAIEmbeddings
 from langchain.retrievers.multi_query import MultiQueryRetriever
 from langchain_community.chat_models import ChatOpenAI
+from langchain_core.documents import Document
 
 app = FastAPI()
 
@@ -63,7 +64,11 @@ DOCROW_BY_HASH = {}
 # 인덱스의 행 번호(i)와 해당 행의 문단 ID(doc_id)를 순회
 for i, doc_id in enumerate(vectorstore.index_to_docstore_id):
     doc = vectorstore.docstore.search(doc_id)
+    print(i, type(doc)) #나중에 지워
     if doc:
+        # doc이 str이면 Document로 변환
+        if isinstance(doc, str):
+            doc = Document(page_content=doc)
         DOCROW_BY_HASH[hash(doc.page_content)] = i
 
 
