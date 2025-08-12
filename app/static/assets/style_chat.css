@@ -145,8 +145,8 @@ body.chat-body-bg {
 .recommend-questions {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  padding: 4px 20px 4px; /* ⬅ 위쪽 여백을 12px → 4px 로 줄임 */
+  gap: 6px;
+  padding: 2px 20px 2px; /* ⬅ 위쪽 여백을 12px → 4px 로 줄임 */
   background-color: transparent;
   margin-bottom: 100px;
 }
