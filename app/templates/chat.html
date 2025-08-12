@@ -132,40 +132,34 @@ async function fetchSuggestions() {
 
 function updateSuggestedTags(questions) { 
   const container = document.getElementById("recommendQuestions");
-  const chatBody = document.getElementById("chatBody");
   container.innerHTML = "";
 
   const safeList = Array.isArray(questions) ? questions : [];
 
-  // 목록이 없으면 숨기고 여백 복구
+  // ✅ 목록 없으면 숨기고 종료
   if (safeList.length === 0) {
     container.style.display = "none";
-    chatBody.classList.remove("with-suggestions");
     return;
   }
-
-  // 목록이 있으면 보여주고 여백 늘리기
+  // ✅ 목록이 있으면 보여주기
   container.style.display = "flex";
-  chatBody.classList.add("with-suggestions");
 
   safeList.forEach(q => {
     const tag = document.createElement("div");
     tag.className = "recommend-question-tag";
-    tag.textContent = `#${q}`;
-    tag.onclick = () => {
-      input.value = q;
+    tag.textContent = `#${q}`; 
+    tag.onclick = () => { 
+      input.value = q; 
       input.focus();
-      sendMessage();
+      sendMessage(); 
 
-      // 클릭 후 추천영역 숨기고 여백 복구
+      // ✅ 클릭 후 추천영역 숨기기
       container.innerHTML = "";
       container.style.display = "none";
-      chatBody.classList.remove("with-suggestions");
     };
-    container.appendChild(tag);
+    container.appendChild(tag); 
   });
 }
-
 
 
 function goToMain() {
@@ -180,6 +174,40 @@ textarea.addEventListener("keydown", function (e) {
     sendMessage();            // 기존 함수 실행
   }
 });
+
+window.addEventListener("DOMContentLoaded", () => {
+    const chatBody = document.getElementById("chatBody");
+
+    // 이미 말풍선이 있으면(새로고침 직후가 아닌 경우) 중복 방지
+    if (chatBody.children.length > 0) return;
+
+    const botContainer = document.createElement("div");
+    botContainer.className = "bot-container";
+
+    const suryongImg = document.createElement("img");
+    suryongImg.src = "/static/assets/suryong.png";
+    suryongImg.alt = "수룡이";
+    suryongImg.className = "suryong-profile";
+
+    const botBubble = document.createElement("div");
+    botBubble.className = "chat-bubble bot";
+    botBubble.textContent =
+      "GPT-4.0 기반의 성신여자대학교 챗봇 “수룡이”입니다. 🐉\n" +
+      "성신여대 2026학년도 수시모집에 대해 궁금하신 점이 있으신가요? \n" +
+      "저는 질문이 구체적일수록 더 정확한 답변을 드릴수 있어요! 🐉\n\n" +
+      "🔮 단어가 아닌 문장 형태로 질문해주세요. (ex) “수시 모집 일정이 언제인가요?” )\n" +
+      "🔮 저는 성신여자대학교 2026학년도 수시모집요강을 기반으로 답변하고 있어요,\n" +
+      "🔮 성신포탈, 도서관,공식 홈페이지, 커뮤니티 등 다른 사이트의 정보는 알지 못해요.\n"+
+      "🔮 제가 제공하는 정보는 항상 정확하지 않을 수 있어요. 정확한 정보는 안내된 출처를 직접 확인해주세요.\n" +
+      "🔮 저는 여러분의 개인정보를 수집하지 않아요. 안심하고 이용해주세요\n" ;
+
+    botContainer.appendChild(suryongImg);
+    botContainer.appendChild(botBubble);
+    chatBody.appendChild(botContainer);
+
+    // 최신으로 스크롤
+    chatBody.scrollTop = chatBody.scrollHeight;
+  });
     </script>    
   </body>
 </html>
