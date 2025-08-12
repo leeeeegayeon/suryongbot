@@ -5,8 +5,10 @@ numpy
 statistics; python_version < "3.10" 
 openai
 langchain
+langchain-core
 langchain-community
 langchain-openai
 faiss-cpu
 python-dotenv  
 jinja2 
+
