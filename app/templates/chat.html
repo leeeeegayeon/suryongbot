@@ -174,15 +174,15 @@ function goToMain() {
 
 textarea.addEventListener("keydown", function (e) {
   if (e.key === "Enter" && !e.shiftKey) {
-    e.preventDefault();       // 줄바꿈 방지
-    sendMessage();            // 기존 함수 실행
+    e.preventDefault();      
+    sendMessage();           
   }
 });
 
 window.addEventListener("DOMContentLoaded", () => {
     const chatBody = document.getElementById("chatBody");
 
-    // 이미 말풍선이 있으면(새로고침 직후가 아닌 경우) 중복 방지
+    
     if (chatBody.children.length > 0) return;
 
     const botContainer = document.createElement("div");
@@ -209,7 +209,7 @@ window.addEventListener("DOMContentLoaded", () => {
     botContainer.appendChild(botBubble);
     chatBody.appendChild(botContainer);
 
-    // 최신으로 스크롤
+    
     chatBody.scrollTop = chatBody.scrollHeight;
   });
     </script>    
