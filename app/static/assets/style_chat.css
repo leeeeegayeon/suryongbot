@@ -11,7 +11,7 @@ body.chat-body-bg {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  overflow: hidden; /*  body 스크롤 제거 */
+  overflow: hidden; 
 }
 
 /* 상단 고정 헤더 */
@@ -20,7 +20,7 @@ body.chat-body-bg {
   top: 0;
   left: 0;
   width: 100%;
-  background-color: white;  /* ← 추가된 부분 */
+  background-color: white;  
   padding: 10px 20px;
   z-index: 10;
 }
@@ -49,9 +49,9 @@ body.chat-body-bg {
 /* 채팅 내용 스크롤 영역 */
 .chat-container {
   flex: 1;
-  margin-top: 75px;        /*  상단 헤더만큼 아래로 밀기 */
-  margin-bottom: 80px;    /*  하단 입력창만큼 위로 밀기 */
-  overflow-y: auto;        /*  이 부분만 스크롤되도록 */
+  margin-top: 75px;       
+  margin-bottom: 80px;   
+  overflow-y: auto;       
   padding: 20px;
   display: flex;
   flex-direction: column;
@@ -83,8 +83,8 @@ body.chat-body-bg {
 
 /* 입력창 영역 */
 .input-area {
-  position: fixed;        /* 화면에 고정 */
-  bottom: 0;              /* 화면 하단에 붙이기 */
+  position: fixed;       
+  bottom: 0;             
   left: 0;
   width: 100%;
   height: 80px;
@@ -93,7 +93,7 @@ body.chat-body-bg {
   padding: 10px;
   border-top: 1px solid #ccc;
   background-color: white;
-  z-index: 100;           /* 다른 요소보다 위에 */
+  z-index: 100;          
 }
 
 
@@ -149,12 +149,12 @@ body.chat-body-bg {
   padding: 2px 20px 2px; 
   background-color: transparent;
   position: fixed;
-  bottom: 110px; /* 입력창 높이만큼 띄우기 */
+  bottom: 110px;
   z-index: 101; 
   left: 0;
   right: 0;
 
-  /* 겹치지 않도록 여백 */
+  
   margin-bottom: 0;
 }
 
@@ -180,7 +180,7 @@ body.chat-body-bg {
   background-color: #f1f1f1;
   border: none;
   border-radius: 8px;
-  background-image: url('/static/assets/home-icon.svg'); /* 아래 설명 참고 */
+  background-image: url('/static/assets/home-icon.svg'); 
   background-repeat: no-repeat;
   background-position: center;
   background-size: 20px 20px;
